@@ -33,7 +33,6 @@
 <summary> Poetry</summary>
 Install poetry from [official website](https://python-poetry.org/docs/#installation).
 
-
 After installation, restart the shell and enter the command
 ```
  poetry --version
@@ -56,14 +55,6 @@ After the previous command, create a virtual environment using the command
 The result is a creation of a  _.venv_  folder in the root of the project .
 Dependencies for creating an environment takes from poetry.lock (priority) and pyproject.toml
 
-To add a new dependency to the environment, run the command
-```
- poetry add <package_name>
-```
-Application example
-```
- poetry add starlette
-```
 ##### How it works after setting up
 
 To activate the virtual environment, enter the command
@@ -90,19 +81,6 @@ UNIX:
 ```
  source .venv/bin/activate
 ```
-</details>
-<details>
-<summary> Pre-commit </summary>
-
-Pre-commit is a tool for automatically running various checks before committing
-
-```
- pre-commit install
-```
-
-Then, with every commit, you will have an automatic
-linter check, as well as automatic conversion to a code style.
-
 </details>
 </details>
 
