@@ -64,12 +64,12 @@ To activate the virtual environment, enter the command
 ```
 It is possible to run project using a command without activating the environment:
 ```
- poetry run <script_name>.py
+ poetry run src/application.py
 ```
 
 The order of work in the shell does not change
 ```
-  python src\run_bot.py
+  python src/application.py
 ```
 A standard method of working with the activation of the environment in the terminal using available commands
 
