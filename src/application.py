@@ -1,17 +1,12 @@
-from telegram import Update
-from telegram.ext import Application, CommandHandler, ContextTypes
+from telegram.ext import Application, CommandHandler
 
-from bot.constants.info.text import MESSAGE
-
-
-async def start(update: Update,
-                context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text(MESSAGE)
+from bot.core.settings import Settings
+from bot.conversations.main_application import start
 
 
 def main() -> None:
-    """Start the bot."""
-    application = Application.builder().token("Token").build()
+    """Initialize a Telegram bot application with a main handler."""
+    application = Application.builder().token(Settings.telegram_token).build()
     application.add_handler(CommandHandler("start", start))
     application.run_polling()
 
