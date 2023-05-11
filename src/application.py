@@ -1,4 +1,4 @@
-from telegram.ext import (Application)
+from telegram.ext import Application
 
 from bot.core.settings import settings
 from bot.handlers import main_handler
