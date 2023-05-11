@@ -17,7 +17,7 @@ main_handler = ConversationHandler(
             ],
         },
         fallbacks=[
-            CommandHandler('start', start)
+            CommandHandler('menu', main_application.main_menu)
         ],
         allow_reentry=True,
     )
