@@ -8,7 +8,6 @@ from bot.conversations.main_application import start, main_menu
 main_handler = ConversationHandler(
         entry_points=[
             CommandHandler('start', start),
-            CallbackQueryHandler(main_menu, pattern=None)
         ],
         states={
             MAIN_MENU: [
