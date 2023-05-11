@@ -9,5 +9,5 @@ async def start(update: Update,
     await update.message.reply_text(START_MESSAGE)
 
 
-async def main_menu(update: Update):
+async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ...
