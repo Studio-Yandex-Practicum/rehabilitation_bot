@@ -11,7 +11,9 @@ main_handler = ConversationHandler(
         ],
         states={
             MAIN_MENU: [
-                ...
+            CallbackQueryHandler(
+                menu_application.menu, pattern=fr"^{key.MENU}_\S*$"
+            ),
             ],
         },
         fallbacks=[
