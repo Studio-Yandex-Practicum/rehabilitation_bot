@@ -24,7 +24,7 @@ SUBMENU = {
     },
     f"{key.MENU}_SUB2": {
         key.NAME: "Ваша специальность",
-        key.DESCRIPTION: "Выберете вашу специальность",
+        key.DESCRIPTION: "Выберите вашу специальность",
         key.Choices: choices.SPECIALTY,
         key.PARENT: f"{key.MENU}_SUB",
     },
