@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:15.3
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ../.env
+
+  backend:
+    build:
+      context: ../
+      dockerfile: infra/Dockerfile
+    restart: always
+    depends_on:
+      - db
+    env_file:
+      - ../.env
+
+volumes:
+  postgres_data:
