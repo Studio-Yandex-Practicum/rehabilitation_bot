@@ -1,14 +1,13 @@
-from telegram.ext import Application, CommandHandler
+from telegram.ext import Application
 
-from bot.conversations.main_application import start, stop
 from bot.core.settings import settings
+from bot.handlers import main_handler
 
 
 def main() -> None:
     """Initialize a Telegram bot application with a main handler."""
     application = Application.builder().token(settings.telegram_token).build()
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("stop", stop))
+    application.add_handler(main_handler)
     application.run_polling()
 
 

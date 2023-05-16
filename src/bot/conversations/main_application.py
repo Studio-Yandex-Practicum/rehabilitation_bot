@@ -9,6 +9,10 @@ async def start(update: Update,
     await update.message.reply_text(START_MESSAGE)
 
 
+async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    ...
+
+
 async def stop(update: Update,
                context: ContextTypes.DEFAULT_TYPE) -> int:
     """Stops the conversation and replies with the given message."""
