@@ -24,4 +24,3 @@ repos:
       files: ^(bot/|core/|src/)
       language: python
       types: [python]
-      args: [--config, setup.cfg]
