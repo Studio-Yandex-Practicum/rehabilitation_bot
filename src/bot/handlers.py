@@ -1,4 +1,4 @@
-from telegram.ext import (CallbackQueryHandler, CommandHandler,
+from telegram.ext import (CommandHandler,
                           ConversationHandler)
 
 from bot.constants.state import MAIN_MENU
@@ -10,9 +10,10 @@ main_handler = ConversationHandler(
     ],
     states={
         MAIN_MENU: [
-            CallbackQueryHandler(
-                # menu_application.menu, pattern=fr"^{key.MENU}_\S*$"
-            ),
+            # CallbackQueryHandler(
+            # menu_application.menu, pattern=fr"^{key.MENU}_\S*$"
+            # ),
+            # uncomment after adding the menu manager
         ],
     },
     fallbacks=[
@@ -20,4 +21,3 @@ main_handler = ConversationHandler(
     ],
     allow_reentry=True,
 )
-
