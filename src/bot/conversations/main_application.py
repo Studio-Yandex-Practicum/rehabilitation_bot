@@ -9,6 +9,7 @@ from bot.conversations.menu_application import menu
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Send a welcome message to the user."""
     await update.message.reply_text(START_MESSAGE)
     return await main_menu(update, context)
 
