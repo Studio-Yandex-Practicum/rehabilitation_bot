@@ -1,7 +1,6 @@
 from pydantic import BaseModel, Field
 
-from bot.constants.info.text import FULL_NAME_REGEX
-from src.bot.constants.info.text import REGEX_NON_LATIN
+from src.bot.constants.info.text import FULL_NAME_REGEX, REGEX_NON_LATIN
 
 
 class FormBase(BaseModel):
