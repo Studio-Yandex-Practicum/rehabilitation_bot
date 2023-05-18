@@ -1,10 +1,10 @@
 from pydantic import BaseModel, Field
 
-from src.bot.constants.info.text import FULL_NAME_REGEX, REGEX_NON_LATIN
+from src.bot.constants.info.text import REGEX_FULL_NAME, REGEX_NON_LATIN
 
 
 class FormBase(BaseModel):
-    full_name: str = Field(None, regex=FULL_NAME_REGEX)
+    full_name: str = Field(None, regex=REGEX_FULL_NAME)
     speciality: str = Field(None, regex=REGEX_NON_LATIN)
     job: str = Field(None, regex=REGEX_NON_LATIN)
     experience: str = Field(None, regex=REGEX_NON_LATIN)
