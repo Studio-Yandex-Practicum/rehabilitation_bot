@@ -56,3 +56,12 @@ virtualenv==20.21.0 ; python_full_version == "3.11.1"
 webencodings==0.5.1 ; python_full_version == "3.11.1"
 xattr==0.10.1 ; sys_platform == "darwin" and python_full_version == "3.11.1"
 zipp==3.15.0 ; python_full_version == "3.11.1"
+
+
+pip~=22.3.1
+mypy~=0.982
+idna~=3.4
+certifi~=2022.12.7
+setuptools~=65.5.0
+requests~=2.28.2
+urllib3~=1.26.14
