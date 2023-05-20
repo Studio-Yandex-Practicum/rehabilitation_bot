@@ -1,4 +1,5 @@
 from telegram import Update
+from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
 from src.bot.constants import state
@@ -19,13 +20,10 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return state.MAIN_MENU
 
 
-async def welcome_new_user_in_group(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """
-    Welcomes a new user when they join a group.
-    """
-    chat_id = update.effective_chat.id
-    user_first_name = update.effective_user.first_name
+async def greet_new_member(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Greeting a new member of the group."""
+    user_first_name = update.effective_user.full_name
     welcome_message = WELCOME_MESSAGE.format(user_first_name)
 
-    await context.bot.send_message(chat_id, welcome_message)
+    await update.effective_chat.send_message(welcome_message, parse_mode=ParseMode.HTML)
 
