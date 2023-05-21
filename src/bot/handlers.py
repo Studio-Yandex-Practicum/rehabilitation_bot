@@ -1,8 +1,16 @@
-from telegram.ext import (CommandHandler,
-                          ConversationHandler)
+import json
+import string
+
+from telegram.ext import (
+    CommandHandler,
+    ConversationHandler,
+    MessageHandler,
+    filters,
+)
 
 from bot.constants.state import MAIN_MENU
 from bot.conversations.main_application import main_menu, start
+
 
 main_handler = ConversationHandler(
     entry_points=[
@@ -20,4 +28,23 @@ main_handler = ConversationHandler(
         CommandHandler('menu', main_menu)
     ],
     allow_reentry=True,
+)
+
+
+async def obscene_language(update, context):
+    chat = update.effective_chat
+    text = update.message.text
+    if {i.lower().translate(str.maketrans(
+            '', '', string.punctuation)) for i in text.split(
+            ' ')}.intersection(set(json.load(open(
+            'src/bot/forbidden_words.json')))) != set():
+        await context.bot.send_message(
+            chat_id=chat.id, text='Нецензурная лексика у нас под запретом!'
+        )
+        await update.message.delete()
+
+
+swearing_words_handler = MessageHandler(
+    filters.TEXT,
+    obscene_language
 )
