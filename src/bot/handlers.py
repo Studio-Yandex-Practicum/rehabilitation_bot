@@ -1,4 +1,5 @@
 import json
+import re
 import string
 
 from telegram.ext import (
@@ -34,10 +35,11 @@ main_handler = ConversationHandler(
 async def obscene_language(update, context):
     chat = update.effective_chat
     text = update.message.text
+    text_no_digital = re.sub('[0-9]', '', text)
     if {i.lower().translate(str.maketrans(
-            '', '', string.punctuation)) for i in text.split(
-            ' ')}.intersection(set(json.load(open(
-            'src/bot/forbidden_words.json')))) != set():
+            '', '', string.punctuation))
+            for i in text_no_digital.split(' ')}.intersection(set(
+            json.load(open('src/bot/forbidden_words.json')))) != set():
         await context.bot.send_message(
             chat_id=chat.id, text='Нецензурная лексика у нас под запретом!'
         )
