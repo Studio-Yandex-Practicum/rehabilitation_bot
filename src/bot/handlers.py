@@ -1,8 +1,8 @@
-from telegram.ext import (CommandHandler,
-                          ConversationHandler)
+from telegram.ext import CommandHandler, ConversationHandler
 
 from bot.constants.state import MAIN_MENU
-from bot.conversations.main_application import main_menu, start
+from bot.conversations.main_application import main_menu, start, stop
+
 
 main_handler = ConversationHandler(
     entry_points=[
@@ -17,7 +17,8 @@ main_handler = ConversationHandler(
         ],
     },
     fallbacks=[
-        CommandHandler('menu', main_menu)
+        CommandHandler('menu', main_menu),
+        CommandHandler('stop', stop)
     ],
     allow_reentry=True,
 )
