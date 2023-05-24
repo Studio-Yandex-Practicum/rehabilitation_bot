@@ -36,7 +36,8 @@ async def obscene_language(update, context):
     chat = update.effective_chat
     text = update.message.text
     text_no_digital = re.sub('[0-9]', '', text)
-    if {i.lower().translate(str.maketrans(
+    if any(word.lower().translate(str.maketrans('', '', string.punctuation))
+            in forbidden_words for word in text_no_digital.split(' ')):
             '', '', string.punctuation))
             for i in text_no_digital.split(' ')}.intersection(set(
             json.load(open('src/bot/forbidden_words.json')))) != set():
