@@ -1,10 +1,10 @@
 from telegram import Update
-from telegram.ext import ContextTypes
+from telegram.ext import ContextTypes, ConversationHandler
 
 from bot.constants import state
 # from bot.constants.info.menu import ALL_MENU
 # uncomment after adding the menu manager
-from bot.constants.info.text import START_MESSAGE
+from bot.constants.info.text import START_MESSAGE, STOP_MESSAGE
 from bot.conversations.menu_application import menu
 
 
@@ -19,3 +19,9 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # uncomment after adding the menu manager
     await menu(update, context)
     return state.MAIN_MENU
+
+
+async def stop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Stops the conversation and replies with the given message."""
+    await update.message.reply_text(STOP_MESSAGE)
+    return ConversationHandler.END

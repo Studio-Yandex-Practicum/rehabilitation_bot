@@ -1,14 +1,14 @@
 from telegram.ext import Application
 
 from bot.core.settings import settings
-from bot.handlers import main_handler, swearing_words_handler
+from bot.handlers import main_handler, moderation_handler
 
 
 def main() -> None:
     """Initialize a Telegram bot application with a main handler."""
     application = Application.builder().token(settings.telegram_token).build()
     application.add_handler(main_handler)
-    application.add_handler(swearing_words_handler)
+    application.add_handler(moderation_handler)
     application.run_polling()
 
 
