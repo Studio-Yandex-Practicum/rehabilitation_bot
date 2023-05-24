@@ -40,7 +40,9 @@ async def obscene_language(update, context):
             '', '', string.punctuation))
             for i in text_no_digital.split(' ')}.intersection(set(
             json.load(open('src/bot/forbidden_words.json')))) != set():
-        await context.bot.send_message(
+        await update.effective_chat.send_message(
+            text='Нецензурная лексика у нас под запретом!'
+        )
             chat_id=chat.id, text='Нецензурная лексика у нас под запретом!'
         )
         await update.message.delete()
