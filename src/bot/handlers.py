@@ -46,7 +46,7 @@ async def obscene_language(update, context):
         await update.message.delete()
 
 
-swearing_words_handler = MessageHandler(
+moderation_handler = MessageHandler(
     filters.TEXT,
     obscene_language
 )
