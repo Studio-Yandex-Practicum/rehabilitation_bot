@@ -23,6 +23,8 @@ autopep8 = "2.0.2"
 add-trailing-comma = "2.4.0"
 mypy = "1.2.0"
 flake8-pyproject = "^1.2.3"
+fuzzywuzzy = "^0.18.0"
+python-levenshtein = "^0.21.0"
 
 [build-system]
 requires = ["poetry-core"]
