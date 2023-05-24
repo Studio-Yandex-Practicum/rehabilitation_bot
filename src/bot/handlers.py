@@ -27,23 +27,6 @@ main_handler = ConversationHandler(
 )
 
 
-async def obscene_language(update, context):
-    chat = update.effective_chat
-    text = update.message.text
-    text_no_digital = re.sub('[0-9]', '', text)
-    if any(word.lower().translate(str.maketrans('', '', string.punctuation))
-            in forbidden_words for word in text_no_digital.split(' ')):
-            '', '', string.punctuation))
-            for i in text_no_digital.split(' ')}.intersection(set(
-           forbidden_words = json.load(open('src/bot/forbidden_words.json'))
-        await update.effective_chat.send_message(
-            text='Нецензурная лексика у нас под запретом!'
-        )
-            chat_id=chat.id, text='Нецензурная лексика у нас под запретом!'
-        )
-        await update.message.delete()
-
-
 moderation_handler = MessageHandler(
     filters.TEXT,
     chat_moderation
