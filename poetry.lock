@@ -520,21 +520,6 @@ Flake8 = ">=5"
 dev = ["pyTest", "pyTest-cov"]
 
 [[package]]
-name = "fuzzywuzzy"
-version = "0.18.0"
-description = "Fuzzy string matching in python"
-category = "main"
-optional = false
-python-versions = "*"
-files = [
-    {file = "fuzzywuzzy-0.18.0-py2.py3-none-any.whl", hash = "sha256:928244b28db720d1e0ee7587acf660ea49d7e4c632569cad4f1cd7e68a5f0993"},
-    {file = "fuzzywuzzy-0.18.0.tar.gz", hash = "sha256:45016e92264780e58972dca1b3d939ac864b78437422beecebb3095f8efd00e8"},
-]
-
-[package.extras]
-speedup = ["python-levenshtein (>=0.12)"]
-
-[[package]]
 name = "h11"
 version = "0.14.0"
 description = "A pure-Python, bring-your-own-I/O implementation of HTTP/1.1"
@@ -774,7 +759,7 @@ testing = ["flake8 (<5)", "pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-chec
 name = "levenshtein"
 version = "0.21.0"
 description = "Python extension for computing string edit distances and similarities."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 files = [
@@ -1381,7 +1366,7 @@ cli = ["click (>=5.0)"]
 name = "python-levenshtein"
 version = "0.21.0"
 description = "Python extension for computing string edit distances and similarities."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 files = [
@@ -1710,6 +1695,21 @@ files = [
 ]
 
 [[package]]
+name = "thefuzz"
+version = "0.19.0"
+description = "Fuzzy string matching in python"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "thefuzz-0.19.0-py2.py3-none-any.whl", hash = "sha256:4fcdde8e40f5ca5e8106bc7665181f9598a9c8b18b0a4d38c41a095ba6788972"},
+    {file = "thefuzz-0.19.0.tar.gz", hash = "sha256:6f7126db2f2c8a54212b05e3a740e45f4291c497d75d20751728f635bb74aa3d"},
+]
+
+[package.extras]
+speedup = ["python-levenshtein (>=0.12)"]
+
+[[package]]
 name = "tokenize-rt"
 version = "5.0.0"
 description = "A wrapper around the stdlib `tokenize` which roundtrips."
@@ -1911,4 +1911,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "3.11.1"
-content-hash = "51f041ffa57493616865953e0851d8c9d95dabd93c015395fd79121a6433c8c0"
+content-hash = "f4b5143436646ff739b6a32c6ab45537987562f9c74acff0125082a3e8c689f5"

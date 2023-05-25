@@ -1,6 +1,8 @@
-from fuzzywuzzy import fuzz, utils
+from types import NoneType
+
 from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
+from thefuzz import fuzz, utils
 
 from bot.constants import state
 # from bot.constants.info.menu import ALL_MENU
@@ -18,6 +20,7 @@ from bot.utils import (
     pending_messages,
     replace_emoji_with_symbols,
     send_message_to_the_conversation,
+    set_dict_key_to_zero,
 )
 
 
@@ -50,7 +53,7 @@ async def welcome_new_user_in_group(
     user_first_name = user.first_name
     welcome_message = WELCOME_MESSAGE.format(user_first_name)
 
-    pending_messages[user.id] = 0
+    set_dict_key_to_zero(user.id)
 
     await send_message_to_the_conversation(chat, welcome_message)
 
@@ -80,9 +83,13 @@ async def handle_all_messages(
     Handle all incoming messages.
     """
     current_message = update.message
+
+    if isinstance(current_message, NoneType):
+        return
+
     current_message_text = current_message.text
     user = current_message.from_user
-    user_first_name = user.first_name
+    # user_first_name = user.first_name
     chat = update.effective_chat
 
     if user.is_bot:
@@ -92,7 +99,7 @@ async def handle_all_messages(
         message_count = increment_message_count("sticker")
 
         if check_message_limit(message_count):
-            pending_messages["sticker"] = 0
+            set_dict_key_to_zero("sticker")
             await send_message_to_the_conversation(
                 chat, text="more than 3 stickers")
             return
@@ -102,9 +109,10 @@ async def handle_all_messages(
         matching = find_obscene_words_in_a_message(
             current_message_text.split())
 
-        if matching is not None and matching[1] >= 70:
+        if matching is not None:
             await send_message_to_the_conversation(
-                chat, text=f"Здесь не матерятся, {user_first_name}!")
+                # chat, text=f"Здесь не матерятся, {user_first_name}!")
+                chat, text=f"found '{matching[0]}'. matching {matching[1]}")
             return
 
     if chat.id in pending_messages:
@@ -122,3 +130,4 @@ async def handle_all_messages(
                 chat, text=f"matching is {matching}")
 
     pending_messages[chat.id] = current_message
+    set_dict_key_to_zero("sticker")

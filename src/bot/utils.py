@@ -1,5 +1,5 @@
 import emoji
-from fuzzywuzzy import fuzz, process
+from thefuzz import process
 
 from bot.constants.info.text import MAX_MESSAGES, REPLACEMENT_VALUE
 
@@ -33,7 +33,14 @@ def replace_emoji_with_symbols(current, previous):
 def find_obscene_words_in_a_message(message):
     # понадобится словарь исключений
     words = [word for word in message if len(word) > 2]
+    best_matching = None
     for word in words:
-        matching = process.extractOne(
-            word, obscene_words, scorer=fuzz.WRatio)
-        return matching
+        matching = process.extractOne(word, obscene_words, score_cutoff=70)
+        if matching is not None:
+            best_matching = matching
+            break
+    return best_matching
+
+
+def set_dict_key_to_zero(key):
+    pending_messages[key] = 0
