@@ -2,8 +2,10 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
+from src.bot.fastapi_admin.config import settings
 
-DATABASE_URL = "sqlite+aiosqlite:///questions.sqlite3"
+
+DATABASE_URL = settings.database_url
 
 
 engine = create_async_engine(DATABASE_URL, echo=True)
