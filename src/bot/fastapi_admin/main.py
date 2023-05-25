@@ -59,6 +59,7 @@ async def get_all_questions(session: AsyncSession = Depends(get_session)):
 
 @app.get(
     "/answers/",
+    response_model=list[AnswerSchema],
     tags=["Ответы"],
     name="Получить список всех записанных ответов",
 )
