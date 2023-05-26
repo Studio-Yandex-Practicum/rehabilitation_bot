@@ -1,5 +1,3 @@
-from types import NoneType
-
 from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
 from thefuzz import fuzz, utils
@@ -84,7 +82,7 @@ async def handle_all_messages(
     """
     current_message = update.message
 
-    if isinstance(current_message, NoneType):
+    if current_message is None or current_message.photo:
         return
 
     current_message_text = current_message.text
@@ -125,7 +123,7 @@ async def handle_all_messages(
 
         matching = fuzz.WRatio(current, previous)
 
-        if matching is not None and matching >= 70:
+        if matching is not None and matching >= 89:
             await send_message_to_the_conversation(
                 chat, text=f"matching is {matching}")
 

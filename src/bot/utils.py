@@ -35,7 +35,7 @@ def find_obscene_words_in_a_message(message):
     words = [word for word in message if len(word) > 2]
     best_matching = None
     for word in words:
-        matching = process.extractOne(word, obscene_words, score_cutoff=70)
+        matching = process.extractOne(word, obscene_words, score_cutoff=89)
         if matching is not None:
             best_matching = matching
             break
