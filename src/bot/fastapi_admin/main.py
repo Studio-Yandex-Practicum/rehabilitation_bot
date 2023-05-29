@@ -7,11 +7,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.bot.fastapi_admin.config import settings
 from src.bot.fastapi_admin.db.base import get_session, init_models
 from src.bot.fastapi_admin.schemas import (
+    AddUserSchema,
     AnswerSchema,
     QuestionSchema,
     UserSchema,
 )
 from src.bot.fastapi_admin.tasks import (
+    add_new_user,
     add_question,
     get_answers,
     get_questions,
@@ -66,6 +68,24 @@ async def get_all_questions(session: AsyncSession = Depends(get_session)):
 async def get_all_answers(session: AsyncSession = Depends(get_session)):
     answers = await get_answers(session)
     return [AnswerSchema(**a.__dict__) for a in answers]
+
+
+@app.post(
+    "/users/",
+    tags=["Пользователи"],
+    name="Добавить нового пользователя",
+)
+async def add_user(
+    user: AddUserSchema,
+    session: AsyncSession = Depends(get_session)
+):
+    user = await add_new_user(session, user=user)
+    try:
+        await session.commit()
+        return user
+    except Exception:
+        await session.rollback()
+        raise Exception("Не получилось добавить нового пользователя")
 
 
 @app.get(
