@@ -1,9 +1,12 @@
 from pydantic import BaseModel
 
 
-class QuestionSchema(BaseModel):
-    id: int
+class AddQuestionSchema(BaseModel):
     question: str
+
+
+class QuestionSchema(AddQuestionSchema):
+    id: int
 
 
 class AnswerSchema(BaseModel):
@@ -13,16 +16,12 @@ class AnswerSchema(BaseModel):
     answer: str
 
 
-class UserSchema(BaseModel):
-    id: int
-    full_name: str
-    speciality: str
-    job: str
-    experience: str
-
-
 class AddUserSchema(BaseModel):
     full_name: str
     speciality: str
     job: str
     experience: str
+
+
+class UserSchema(AddUserSchema):
+    id: int

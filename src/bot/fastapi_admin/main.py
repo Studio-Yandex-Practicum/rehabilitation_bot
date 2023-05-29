@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.bot.fastapi_admin.config import settings
 from src.bot.fastapi_admin.db.base import get_session, init_models
 from src.bot.fastapi_admin.schemas import (
+    AddQuestionSchema,
     AddUserSchema,
     AnswerSchema,
     QuestionSchema,
@@ -31,7 +32,7 @@ cli = typer.Typer()
     name="Добавить новый вопрос",
 )
 async def add_new_question(
-    question: QuestionSchema, session: AsyncSession = Depends(get_session)
+    question: AddQuestionSchema, session: AsyncSession = Depends(get_session)
 ):
     question = add_question(session, question.question)
     try:
