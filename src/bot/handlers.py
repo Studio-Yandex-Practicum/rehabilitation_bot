@@ -1,8 +1,9 @@
-from telegram.ext import CommandHandler, ConversationHandler
+from telegram.ext import CommandHandler, ConversationHandler, MessageHandler, filters
 
 from bot.constants.state import MAIN_MENU
 from bot.conversations.main_application import main_menu, start, stop
 
+from bot.conversations.main_application import greet_new_member
 
 main_handler = ConversationHandler(
     entry_points=[
@@ -21,4 +22,9 @@ main_handler = ConversationHandler(
         CommandHandler('stop', stop)
     ],
     allow_reentry=True,
+)
+
+greet_new_member_handler = MessageHandler(
+    filters.StatusUpdate.NEW_CHAT_MEMBERS,
+    greet_new_member
 )
