@@ -1,0 +1,76 @@
+name: Rehabilitation Bot
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  linters_test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.11.1
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip 
+          # установка flake8 и его плагинов
+          pip install flake8 pep8-naming flake8-broken-line flake8-return flake8-isort
+          pip install mypy
+          pip install -r requirements.txt 
+
+      - name: Run flake8
+        run: python -m flake8
+
+      - name: Run mypy
+        run: mypy .
+
+  build_and_push_to_docker_hub:
+    #name: Push Docker image to Docker Hub
+    runs-on: ubuntu-latest
+    needs: linters_test
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to Docker
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Push bot to Docker Hub
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: lexxar91/bot:latest
+
+  deploy:
+      runs-on: ubuntu-latest
+      needs: build_and_push_to_docker_hub
+      steps:
+        - name: executing remote ssh commands to deploy
+          uses: appleboy/ssh-action@master
+          with:
+            host: ${{ secrets.HOST }}
+            username: ${{ secrets.USER }}
+            key: ${{ secrets.SSH }}
+            stack_file_name: docker-compose.yml
+            script: |
+              sudo docker pull lexxar91/bot:latest
+              sudo docker-compose stop
+              sudo docker-compose rm bot
+              sudo docker-compose up -d 
+

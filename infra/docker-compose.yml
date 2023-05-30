@@ -1,0 +1,24 @@
+version: '3'
+services:
+  db:
+    image: postgres:15.3
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data/
+#    env_file:
+#      - ../.env
+    # при подключении с реальными данными БД убрать поле environment
+    environment:
+      - POSTGRES_PASSWORD='qwerty12345'
+
+  bot:
+    # заменить lexxar91/bot:latest на свой образ в docker hub
+    image: lexxar91/bot:latest
+    restart: unless-stopped
+#    env_file:
+#      - ./.env
+
+volumes:
+  db_data:
