@@ -1,10 +1,9 @@
 from telegram.ext import Application
 
 from bot.core.settings import settings
-from bot.handlers import (
+from bot.handlers import (  # welcome_filter_handler,
     main_handler,
     message_filter_handler,
-    welcome_filter_handler,
     welcome_new_user_handler,
 )
 
@@ -12,12 +11,14 @@ from bot.handlers import (
 def main() -> None:
     """Initialize a Telegram bot application with a main handler."""
     application = Application.builder().token(settings.telegram_token).build()
-    application.add_handlers([
-        main_handler,
-        welcome_new_user_handler,
-        welcome_filter_handler,
-        message_filter_handler,
-    ])
+    application.add_handlers(
+        [
+            main_handler,
+            welcome_new_user_handler,
+            # welcome_filter_handler,
+            message_filter_handler,
+        ]
+    )
     application.run_polling()
 
 

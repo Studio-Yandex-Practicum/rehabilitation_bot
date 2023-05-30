@@ -6,9 +6,9 @@ from telegram.ext import (
 )
 
 from bot.constants.state import MAIN_MENU
+# handle_messages_from_new_user
 from bot.conversations.main_application import (
     handle_all_messages,
-    handle_messages_from_new_user,
     main_menu,
     start,
     welcome_new_user_in_group,
@@ -17,7 +17,7 @@ from bot.conversations.main_application import (
 
 main_handler = ConversationHandler(
     entry_points=[
-        CommandHandler('start', start),
+        CommandHandler("start", start),
     ],
     states={
         MAIN_MENU: [
@@ -27,23 +27,27 @@ main_handler = ConversationHandler(
             # uncomment after adding the menu manager
         ],
     },
-    fallbacks=[
-        CommandHandler('menu', main_menu)
-    ],
+    fallbacks=[CommandHandler("menu", main_menu)],
     allow_reentry=True,
 )
 
 
 message_filter_handler = MessageHandler(
-    filters.ALL & (~ filters.StatusUpdate.ALL), handle_all_messages)
+    filters.TEXT | filters.Sticker.ALL & (~filters.StatusUpdate.ALL),
+    handle_all_messages,
+)
 
-welcome_filter_handler = MessageHandler(
-    filters.TEXT & (filters.Entity("url") |
-                    filters.Entity("text_link") |
-                    filters.Entity("email") |
-                    filters.Entity('mention')), handle_messages_from_new_user)
+# welcome_filter_handler = MessageHandler(
+#     filters.TEXT
+#     & (
+#         filters.Entity("url")
+#         | filters.Entity("text_link")
+#         | filters.Entity("email")
+#         | filters.Entity("mention")
+#     ),
+#     handle_messages_from_new_user,
+# )
 
 welcome_new_user_handler = MessageHandler(
-    filters.StatusUpdate.NEW_CHAT_MEMBERS,
-    welcome_new_user_in_group
+    filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome_new_user_in_group
 )
