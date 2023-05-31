@@ -30,7 +30,6 @@ async def greet_new_member(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Greeting a new member of the group."""
     user_first_name = update.effective_user.full_name
     welcome_message = WELCOME_MESSAGE.format(user_first_name)
-
     await update.effective_chat.send_message(
         welcome_message, parse_mode=ParseMode.HTML
     )
