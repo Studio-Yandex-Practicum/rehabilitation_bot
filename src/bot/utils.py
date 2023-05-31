@@ -1,13 +1,31 @@
-import json
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from smtplib import SMTP_SSL, SMTPException
+
+from bot.core.settings import settings
 
 
-ar = []
+def send_email_message(message: str, subject: str, recipient: str) -> bool:
+    """Send email message to the specified curator email-address."""
+    msg = MIMEMultipart()
+    msg['From'] = settings.smtp_server_bot_email
+    msg['To'] = recipient
+    msg['Subject'] = subject
+    msg.attach(MIMEText(message, 'html'))
+    try:
+        with SMTP_SSL(
+            settings.smtp_server_address,
+            settings.smtp_server_port,
+        ) as mailserver:
+            if settings.debug:
+                mailserver.set_debuglevel(True)
 
-with open('words.txt', encoding='utf-8') as r:
-    for i in r:
-        n = i.lower().split('\n')[0]
-        if n != '':
-            ar.append(n)
+            mailserver.login(
+                settings.smtp_server_bot_email,
+                settings.smtp_server_bot_password,
+            )
 
-with open('forbidden_words.json', 'w', encoding='utf-8') as e:
-    json.dump(ar, e)
+            mailserver.send_message(msg)
+        return True
+    except SMTPException:
+        return False

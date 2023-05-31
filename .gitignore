@@ -129,10 +129,3 @@ dmypy.json
 .pyre/
 
 .vscode/
-
-words_russian.txt
-words.txt
-neural_network.py
-spam.csv
-models.py
-russian_words.json

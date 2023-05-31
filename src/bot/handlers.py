@@ -1,11 +1,21 @@
-
-from telegram.ext import (CommandHandler, ConversationHandler, MessageHandler,
-                          filters)
+from telegram.ext import (
+    CommandHandler,
+    ConversationHandler,
+    MessageHandler,
+    filters,
+)
 
 from bot.constants.state import MAIN_MENU
-from bot.conversations.main_application import main_menu, start, stop
-from bot.conversations.moderation_application import (chat_moderation,
-                                                      chat_moderation_spam)
+from bot.conversations.main_application import (
+    greet_new_member,
+    main_menu,
+    start,
+    stop,
+)
+from bot.conversations.moderation_application import (
+    chat_moderation,
+    chat_moderation_spam,
+)
 
 
 main_handler = ConversationHandler(
@@ -36,4 +46,9 @@ moderation_handler = MessageHandler(
 moderation_spam_handler = MessageHandler(
     filters.TEXT,
     chat_moderation_spam
+)
+
+greet_new_member_handler = MessageHandler(
+    filters.StatusUpdate.NEW_CHAT_MEMBERS,
+    greet_new_member
 )
