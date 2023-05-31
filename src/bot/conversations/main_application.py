@@ -8,12 +8,18 @@ from bot.constants import state
 # from bot.constants.info.menu import ALL_MENU
 # uncomment after adding the menu manager
 from bot.constants.info.text import (
-    MAX_MESSAGES,
+    RATIO_LIMIT,
     START_MESSAGE,
     STOP_MESSAGE,
     WELCOME_MESSAGE,
 )
 from bot.conversations.menu_application import menu
+from bot.utils import (
+    check_message_limit,
+    fuzzy_string_match,
+    replace_emoji_with_symbols,
+    user_data,
+)
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -45,9 +51,6 @@ async def stop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     return ConversationHandler.END
 
 
-user_data = {}
-
-
 async def handle_all_messages(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ):
@@ -61,12 +64,10 @@ async def handle_all_messages(
 
     if user_id not in user_data:
         user_data[user_id] = {
-            "stickers_count": 1,
+            "stickers_count": 0,
             "previous_message": current_message,
         }
         return
-
-    print(user_data)
 
     # sticker flood checker
     if current_message.sticker:
@@ -80,15 +81,29 @@ async def handle_all_messages(
 
         user_data[user_id]["previous_message"] = current_message
 
-        if user_data[user_id]["stickers_count"] >= MAX_MESSAGES:
+        if check_message_limit(user_id):
             await update.effective_chat.send_message(
                 text=f"Воу-воу, палегче, {username}!"
             )
         return
-    else:
-        user_data[user_id]["stickers_count"] = 0
-        user_data[user_id]["previous_message"] = current_message
 
     # text flood checker
-    # if current_message.text:
-    #     previous_message_text = user_data[user_id][""]
+    if current_message.text:
+        current_message_text = current_message.text.lower()
+        previous_message_text = user_data[user_id][
+            "previous_message"
+        ].text.lower()
+
+        current_text, previous_text = replace_emoji_with_symbols(
+            current_message_text, previous_message_text
+        )
+
+        matching = fuzzy_string_match(current_text, previous_text, RATIO_LIMIT)
+
+        if matching:
+            await update.effective_chat.send_message(
+                text=f"matching is {matching}"
+            )
+
+    user_data[user_id]["stickers_count"] = 0
+    user_data[user_id]["previous_message"] = current_message
