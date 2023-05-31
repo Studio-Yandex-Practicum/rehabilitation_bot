@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from telegram import Update
 from telegram.constants import ParseMode
@@ -56,27 +56,29 @@ async def handle_all_messages(
     """
     current_message = update.message
     user_id = current_message.from_user.id
-    current_time = datetime.now()
+    current_time = datetime.now(timezone.utc)
     username = current_message.from_user.first_name
 
     if user_id not in user_data:
         user_data[user_id] = {
             "stickers_count": 1,
-            "last_msg_time": current_time,
+            "previous_message": current_message,
         }
+        return
 
     print(user_data)
 
     # sticker flood checker
     if current_message.sticker:
-        time_diff = current_time - user_data[user_id]["last_msg_time"]
+        previous_time = user_data[user_id]["previous_message"].date
+        time_diff = current_time - previous_time
 
         if time_diff < timedelta(seconds=30):
             user_data[user_id]["stickers_count"] += 1
-            user_data[user_id]["last_msg_time"] = current_time
         else:
             user_data[user_id]["stickers_count"] = 0
-            user_data[user_id]["last_msg_time"] = current_time
+
+        user_data[user_id]["previous_message"] = current_message
 
         if user_data[user_id]["stickers_count"] >= MAX_MESSAGES:
             await update.effective_chat.send_message(
@@ -85,4 +87,8 @@ async def handle_all_messages(
         return
     else:
         user_data[user_id]["stickers_count"] = 0
-        user_data[user_id]["last_msg_time"] = current_time
+        user_data[user_id]["previous_message"] = current_message
+
+    # text flood checker
+    # if current_message.text:
+    #     previous_message_text = user_data[user_id][""]
