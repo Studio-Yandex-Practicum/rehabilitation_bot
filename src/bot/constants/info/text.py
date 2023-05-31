@@ -18,5 +18,5 @@ REGEX_NON_LATIN = r"^[^a-zA-Z]*$"
 REGEX_FULL_NAME = r"^([А-Яа-яЁё\-]+\b {,3}){2,}$"
 
 # MESSAGE FILTER
-MAX_MESSAGES = 4
+MAX_MESSAGES = 3
 RATIO_LIMIT = 89
