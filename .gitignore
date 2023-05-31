@@ -129,4 +129,10 @@ dmypy.json
 .pyre/
 
 .vscode/
-.idea/
+russian_words.json
+spam.csv
+words_russian.txt
+words.txt
+
+
+

@@ -1,5 +1,4 @@
-from sqlalchemy import Column, Integer, MetaData, String, Table, create_engine
-
+from sqlalchemy import MetaData, Table, Column, Integer, String, create_engine
 
 engine = create_engine('sqlite:///sqlite3.db')
 engine.connect()

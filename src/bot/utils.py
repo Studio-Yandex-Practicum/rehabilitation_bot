@@ -26,7 +26,6 @@ def send_email_message(message: str, subject: str, recipient: str) -> bool:
             )
 
             mailserver.send_message(msg)
-
         return True
     except SMTPException:
         return False
