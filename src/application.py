@@ -1,6 +1,6 @@
-from bot.core import logger  # noqa
 from telegram.ext import Application
 
+from bot.core import logger  # noqa
 from bot.core.settings import settings
 from bot.handlers import main_handler, greet_new_member_handler
 
