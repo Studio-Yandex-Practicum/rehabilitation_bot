@@ -8,8 +8,8 @@ from telegram.ext import (
 from bot.constants.state import MAIN_MENU
 from bot.conversations.main_application import (
     greet_new_member,
-    handle_all_messages,
     main_menu,
+    manage_message_flooding,
     start,
     stop,
 )
@@ -55,5 +55,5 @@ greet_new_member_handler = MessageHandler(
 
 message_filter_handler = MessageHandler(
     filters.TEXT | filters.Sticker.ALL & (~filters.StatusUpdate.ALL),
-    handle_all_messages,
+    manage_message_flooding,
 )
