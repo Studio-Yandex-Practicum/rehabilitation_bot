@@ -13,11 +13,11 @@ from bot.handlers import (
 def main() -> None:
     """Initialize a Telegram bot application with a main handler."""
     application = Application.builder().token(settings.telegram_token).build()
-    application.add_handlers(
-        [main_handler, greet_new_member_handler, message_filter_handler]
-    )
-    application.add_handler(moderation_handler, group=0)
-    application.add_handler(moderation_spam_handler, group=1)
+    application.add_handler(main_handler, group=0)
+    application.add_handler(greet_new_member_handler, group=1)
+    application.add_handler(message_filter_handler, group=2)
+    application.add_handler(moderation_handler, group=3)
+    application.add_handler(moderation_spam_handler, group=4)
     application.run_polling()
 
 
