@@ -13,6 +13,10 @@ from bot.conversations.main_application import (
     start,
     stop,
 )
+from bot.conversations.moderation_application import (
+    chat_moderation,
+    chat_moderation_spam,
+)
 
 
 main_handler = ConversationHandler(
@@ -32,6 +36,17 @@ main_handler = ConversationHandler(
         CommandHandler("stop", stop),
     ],
     allow_reentry=True,
+)
+
+
+moderation_handler = MessageHandler(
+    filters.TEXT,
+    chat_moderation
+)
+
+moderation_spam_handler = MessageHandler(
+    filters.TEXT,
+    chat_moderation_spam
 )
 
 greet_new_member_handler = MessageHandler(

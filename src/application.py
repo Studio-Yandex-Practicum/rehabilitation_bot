@@ -5,6 +5,8 @@ from bot.handlers import (
     greet_new_member_handler,
     main_handler,
     message_filter_handler,
+    moderation_handler,
+    moderation_spam_handler,
 )
 
 
@@ -14,6 +16,8 @@ def main() -> None:
     application.add_handlers(
         [main_handler, greet_new_member_handler, message_filter_handler]
     )
+    application.add_handler(moderation_handler, group=0)
+    application.add_handler(moderation_spam_handler, group=1)
     application.run_polling()
 
 
