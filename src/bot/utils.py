@@ -5,7 +5,7 @@ from smtplib import SMTP_SSL, SMTPException
 import emoji
 from thefuzz import fuzz
 
-from bot.constants.info.text import MAX_MESSAGES
+from bot.constants.info.text import MAX_MESSAGES, RATIO_LIMIT
 from bot.core.settings import settings
 
 
@@ -45,9 +45,9 @@ def remove_emoji_from_text(current, previous):
     return current_text, previous_text
 
 
-def fuzzy_string_matching(current_text, previous_text, limit):
+def fuzzy_string_matching(current_text, previous_text):
     ratio = fuzz.ratio(current_text, previous_text)
-    return ratio >= limit
+    return ratio >= RATIO_LIMIT
 
 
 def check_message_limit(user_id):

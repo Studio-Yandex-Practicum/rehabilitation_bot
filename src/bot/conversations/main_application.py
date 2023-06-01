@@ -8,7 +8,6 @@ from bot.constants import state
 # from bot.constants.info.menu import ALL_MENU
 # uncomment after adding the menu manager
 from bot.constants.info.text import (
-    RATIO_LIMIT,
     START_MESSAGE,
     STOP_MESSAGE,
     WELCOME_MESSAGE,
@@ -81,7 +80,7 @@ async def handle_all_messages(
         update_user_data(user_id, current_message, time_diff)
 
         if check_message_limit(user_id):
-            await update.effective_chat.send_message(
+            await current_message.reply_text(
                 text=f"Воу-воу, палехче, {username}!"
             )
         return
@@ -92,9 +91,7 @@ async def handle_all_messages(
             current_message.text, previous_message.text
         )
 
-        matching = fuzzy_string_matching(
-            current_text, previous_text, RATIO_LIMIT
-        )
+        matching = fuzzy_string_matching(current_text, previous_text)
 
         if matching:
             await update.effective_chat.send_message(
