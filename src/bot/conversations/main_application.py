@@ -53,7 +53,7 @@ async def stop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 async def manage_message_flooding(
     update: Update, context: ContextTypes.DEFAULT_TYPE
-):
+) -> None:
     """
     Monitoring and managing message flooding and sticker usage by comparing
     text similarity and tracking the number of stickers sent by each user.
