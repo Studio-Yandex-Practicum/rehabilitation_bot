@@ -32,45 +32,28 @@ jobs:
       - name: Run mypy
         run: mypy .
 
-  build_and_push_to_docker_hub:
-    #name: Push Docker image to Docker Hub
-    runs-on: ubuntu-latest
-    needs: linters_test
 
-    steps:
-      - name: Check out the repo
-        uses: actions/checkout@v2
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-
-      - name: Login to Docker
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Push bot to Docker Hub
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: Dockerfile
-          push: true
-          tags: lexxar91/bot:latest
 
   deploy:
-      runs-on: ubuntu-latest
-      needs: build_and_push_to_docker_hub
-      steps:
-        - name: executing remote ssh commands to deploy
-          uses: appleboy/ssh-action@master
-          with:
-            host: ${{ secrets.HOST }}
-            username: ${{ secrets.USER }}
-            key: ${{ secrets.SSH }}
-            stack_file_name: docker-compose.yml
-            script: |
-              sudo docker pull lexxar91/bot:latest
-              sudo docker-compose stop
-              sudo docker-compose rm bot
-              sudo docker-compose up -d 
+     runs-on: ubuntu-latest
+     needs: linters_test
+     steps:
+       - name: executing remote ssh commands to deploy
+         uses: appleboy/ssh-action@master
+         with:
+           host: ${{ secrets.HOST }}
+           username: ${{ secrets.USER }}
+           key: ${{ secrets.SSH }}
+           stack_file_name: docker-compose.yaml
+           script: |
+             sudo docker stop $(sudo docker ps -a -q --filter="expose=5432")
+             rm -r rehabilitation_bot
+             git clone https://github.com/Studio-Yandex-Practicum/rehabilitation_bot
+             cd rehabilitation_bot
+             touch .env
+             echo SECRET_KEY=${{ secrets.TELEGRAM_TOKEN }} >> .env
+             echo SECRET_KEY=${{ secrets.POSTGRES_PASSWORD }} >> .env
+             cd infra
+             sudo docker-compose build
+             sudo docker-compose up -d 
 
