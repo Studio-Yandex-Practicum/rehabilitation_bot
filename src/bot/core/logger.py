@@ -7,6 +7,7 @@ from bot.core.settings import settings
 BASE_DIR = Path(__file__).resolve().parent.parent
 LOG_PATH = BASE_DIR / 'logs'
 LOG_PATH.mkdir(parents=True, exist_ok=True)
+LOG_PATH = LOG_PATH / settings.log_filename
 
 DEFAULT_LOGGING = {
     'version': 1,
@@ -26,7 +27,7 @@ DEFAULT_LOGGING = {
         'file': {
             'class': 'logging.handlers.TimedRotatingFileHandler',
             'formatter': 'default',
-            'filename': LOG_PATH / settings.log_filename,
+            'filename': LOG_PATH,
             'when': 'D',
             'interval': 1,
             'backupCount': 60,
