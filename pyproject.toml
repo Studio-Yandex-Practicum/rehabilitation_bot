@@ -17,6 +17,7 @@ emoji = "^2.4.0"
 thefuzz = {extras = ["speedup"], version = "^0.19.0"}
 scikit-learn = "^1.2.2"
 pandas = "^2.0.2"
+sqlalchemy = "^2.0.15"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^6.0.0"
