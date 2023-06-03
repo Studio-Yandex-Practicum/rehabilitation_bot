@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 
 from telegram import Update
 from telegram.constants import ParseMode
@@ -16,10 +16,11 @@ from bot.constants.info.text import (
 from bot.conversations.menu_application import menu
 from bot.utils import (
     check_message_limit,
+    create_community_member,
     fuzzy_string_matching,
+    get_by_user_id,
     preformatted_text,
     update_user_data,
-    user_data,
 )
 
 
@@ -60,26 +61,27 @@ async def manage_message_flooding(
     """
     current_message = update.message
     user_id = current_message.from_user.id
-    current_time = datetime.now(timezone.utc).replace(microsecond=0)
+    current_time = datetime.utcnow().replace(microsecond=0)
     user_first_name = current_message.from_user.first_name
 
-    if user_id not in user_data:
-        user_data[user_id] = {
-            "stickers_count": 0,
-            "previous_message": current_message,
-        }
+    community_member = await get_by_user_id(user_id)
+
+    if not community_member:
+        await create_community_member(user_id, current_message)
         return
 
-    previous_message = user_data.get(user_id).get("previous_message")
+    previous_message = community_member.previous_message
 
     if previous_message.sticker and current_message.sticker:
         previous_time = previous_message.date
         elapsed_time = current_time - previous_time
+
         time_diff = elapsed_time < timedelta(seconds=30)
 
-        update_user_data(user_id, current_message, time_diff)
+        message_count = await update_user_data(
+            community_member, current_message, time_diff)
 
-        if check_message_limit(user_id):
+        if check_message_limit(message_count):
             await current_message.reply_text(
                 text=FLOOD_MESSAGE.format(user_first_name)
             )
@@ -95,4 +97,4 @@ async def manage_message_flooding(
                 text=FLOOD_MESSAGE.format(user_first_name)
             )
 
-    update_user_data(user_id, current_message)
+    await update_user_data(community_member, current_message)

@@ -12,6 +12,8 @@ class Settings(BaseSettings):
 
     email_curator: str = ''
 
+    database_url: str
+
     class Config:
         env_file = '.env'
         env_file_encoding = 'utf-8'
