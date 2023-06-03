@@ -26,21 +26,21 @@ obscene_language = Table(
 )
 
 
-class CustomMessage(Base):
-    __tablename__ = 'message_table'
+class MessageData(Base):
+    __tablename__ = 'message_data'
 
     text = Column(String, default=None)
     sticker = Column(String, default=None)
     date = Column(DateTime, default=datetime.datetime.now())
 
 
-class UserFilteredData(Base):
-    __tablename__ = 'filter_table'
+class MessageFilterData(Base):
+    __tablename__ = 'message_filter_data'
 
     user_id = Column(Integer, unique=True, nullable=False)
     sticker_count = Column(Integer(), nullable=False)
-    previous_message = relationship("CustomMessage", lazy="subquery")
-    previous_message_id = Column(Integer, ForeignKey('message_table.id'))
+    last_message = relationship("MessageData", lazy="subquery")
+    last_message_id = Column(Integer, ForeignKey('message_data.id'))
 
     def __repr__(self):
-        return f"{self.user_id}, {self.sticker_count}, {self.previous_message}"
+        return f"{self.user_id}, {self.sticker_count}, {self.last_message}"

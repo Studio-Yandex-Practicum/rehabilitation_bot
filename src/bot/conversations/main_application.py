@@ -18,9 +18,9 @@ from bot.utils import (
     check_message_limit,
     create_community_member,
     fuzzy_string_matching,
-    get_by_user_id,
+    get_community_member_from_db,
     preformatted_text,
-    update_user_data,
+    update_community_member_data,
 )
 
 
@@ -64,22 +64,23 @@ async def manage_message_flooding(
     current_time = datetime.utcnow().replace(microsecond=0)
     user_first_name = current_message.from_user.first_name
 
-    community_member = await get_by_user_id(user_id)
+    community_member = await get_community_member_from_db(user_id)
 
     if not community_member:
         await create_community_member(user_id, current_message)
         return
 
-    previous_message = community_member.previous_message
+    last_message = community_member.last_message
 
-    if previous_message.sticker and current_message.sticker:
-        previous_time = previous_message.date
+    if last_message.sticker and current_message.sticker:
+        previous_time = last_message.date
         elapsed_time = current_time - previous_time
 
         time_diff = elapsed_time < timedelta(seconds=30)
 
-        message_count = await update_user_data(
-            community_member, current_message, time_diff)
+        message_count = await update_community_member_data(
+            community_member, current_message, time_diff
+        )
 
         if check_message_limit(message_count):
             await current_message.reply_text(
@@ -87,9 +88,9 @@ async def manage_message_flooding(
             )
         return
 
-    if previous_message.text and current_message.text:
+    if last_message.text and current_message.text:
         current_text, previous_text = preformatted_text(
-            current_message.text, previous_message.text
+            current_message.text, last_message.text
         )
 
         if fuzzy_string_matching(current_text, previous_text):
@@ -97,4 +98,4 @@ async def manage_message_flooding(
                 text=FLOOD_MESSAGE.format(user_first_name)
             )
 
-    await update_user_data(community_member, current_message)
+    await update_community_member_data(community_member, current_message)

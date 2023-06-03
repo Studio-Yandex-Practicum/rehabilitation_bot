@@ -3,17 +3,14 @@ from email.mime.text import MIMEText
 from smtplib import SMTP_SSL, SMTPException
 
 import emoji
-from sqlalchemy import select
 from telegram import Message
 from thefuzz import fuzz
 
 from bot.constants.info.text import MAX_MESSAGES, RATIO_LIMIT
 from bot.core.database import async_session
-from bot.core.db.models import CustomMessage, UserFilteredData
+from bot.core.db.crud import message_data_crud, message_filter_data_crud
+from bot.core.db.models import MessageData, MessageFilterData
 from bot.core.settings import settings
-
-
-user_data = {}
 
 
 def send_email_message(message: str, subject: str, recipient: str) -> bool:
@@ -53,6 +50,10 @@ def fuzzy_string_matching(current_text: str, previous_text: str) -> bool:
     return ratio >= RATIO_LIMIT
 
 
+def check_message_limit(stickers_count: int) -> bool:
+    return stickers_count >= MAX_MESSAGES
+
+
 def preformatted_text(
     current_text: str, previous_text: str
 ) -> tuple[str, str]:
@@ -61,87 +62,61 @@ def preformatted_text(
     return remove_emoji_from_text(current_message_text, previous_message_text)
 
 
-async def create_community_member(
-            user_id: int,
-            message: Message,
-):
-    custom_message = CustomMessage(
-        text=getattr(message, 'text', None),
-        sticker=getattr(message.sticker, 'emoji', None),
-        date=message.date
-    )
-    print(message)
+async def get_community_member_from_db(user_id: int):
     async with async_session() as session:
-        community_member = UserFilteredData(
-            user_id=user_id,
-            previous_message=custom_message,
-            sticker_count=0)
+        community_member = (
+            await message_filter_data_crud.get_message_filter_data_by_user_id(
+                user_id, session
+            )
+        )
+        return community_member
+
+
+async def create_community_member(
+    user_id: int,
+    message: Message,
+):
+    async with async_session() as session:
+        message_data = MessageData()
+
+        await message_data_crud.update_message_data_attrib(
+            message_data, message, session
+        )
+
+        community_member = MessageFilterData(
+            user_id=user_id, last_message=message_data, sticker_count=0
+        )
+
         session.add(community_member)
         await session.commit()
         await session.refresh(community_member)
         return community_member
 
 
-async def get_all():
-    async with async_session() as session:
-        db_objs = await session.execute(select(UserFilteredData))
-        return db_objs.scalars().all()
-
-
-async def get_by_user_id(user_id: int):
-    async with async_session() as session:
-        db_obj = await session.execute(
-            select(UserFilteredData).where(
-                UserFilteredData.user_id == user_id
-            )
-        )
-        return db_obj.scalars().first()
-
-
-async def get_message_by_id(message_id: int):
-    async with async_session() as session:
-        db_obj = await session.execute(
-            select(CustomMessage).where(
-                CustomMessage.id == message_id
-            )
-        )
-        return db_obj.scalars().first()
-
-
-async def change_message_attrib(object, message: Message):
-    async with async_session() as session:
-        object.text = getattr(message, 'text', None)
-        object.sticker = getattr(message.sticker, 'emoji', None)
-        object.date = message.date
-        session.add(object)
-        await session.commit()
-        await session.refresh(object)
-
-
-def check_message_limit(stickers_count: int) -> bool:
-    return stickers_count >= MAX_MESSAGES
-
-
-async def update_user_data(
-        community_member: UserFilteredData,
-        message: Message,
-        time_diff: bool = False
+async def update_community_member_data(
+    community_member: MessageFilterData,
+    message: Message,
+    time_diff: bool = False,
 ):
-    message_id = community_member.previous_message_id
-    filter_data = await get_message_by_id(message_id)
-
-    await change_message_attrib(filter_data, message)
-
-    sticker_count = community_member.sticker_count
-
-    if time_diff:
-        sticker_count += 1
-    else:
-        sticker_count = 0
-
-    community_member.sticker_count = sticker_count
-
     async with async_session() as session:
+        message_id = community_member.last_message_id
+        message_data = await message_data_crud.get_message_data_by_id(
+            message_id, session
+        )
+
+        await message_data_crud.update_message_data_attrib(
+            message_data, message, session
+        )
+
+        sticker_count = community_member.sticker_count
+
+        if time_diff:
+            sticker_count += 1
+        else:
+            sticker_count = 0
+
+        community_member.sticker_count = sticker_count
+
         session.add(community_member)
         await session.commit()
         await session.refresh(community_member)
