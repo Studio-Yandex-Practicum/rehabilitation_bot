@@ -73,7 +73,7 @@ async def manage_message_flooding(
     last_message = community_member.last_message
 
     if last_message.sticker and current_message.sticker:
-        previous_time = last_message.date
+        previous_time = last_message.timestamp
         elapsed_time = current_time - previous_time
 
         time_diff = elapsed_time < timedelta(seconds=30)

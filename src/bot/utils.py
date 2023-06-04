@@ -9,7 +9,7 @@ from thefuzz import fuzz
 from bot.constants.info.text import MAX_MESSAGES, RATIO_LIMIT
 from bot.core.database import async_session
 from bot.core.db.crud import message_data_crud, message_filter_data_crud
-from bot.core.db.models import MessageData, MessageFilterData
+from bot.core.db.schemas import MessageBase, MessageFilterBase
 from bot.core.settings import settings
 
 
@@ -77,13 +77,13 @@ async def create_community_member(
     message: Message,
 ):
     async with async_session() as session:
-        message_data = MessageData()
+        message_data = MessageBase()
 
         await message_data_crud.update_message_data_attrib(
             message_data, message, session
         )
 
-        community_member = MessageFilterData(
+        community_member = MessageFilterBase(
             user_id=user_id, last_message=message_data, sticker_count=0
         )
 
@@ -94,7 +94,7 @@ async def create_community_member(
 
 
 async def update_community_member_data(
-    community_member: MessageFilterData,
+    community_member: MessageFilterBase,
     message: Message,
     time_diff: bool = False,
 ):
