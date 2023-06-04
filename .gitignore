@@ -129,3 +129,6 @@ dmypy.json
 .pyre/
 
 .vscode/
+.idea/
+
+src/bot/core/db/sqlite.db

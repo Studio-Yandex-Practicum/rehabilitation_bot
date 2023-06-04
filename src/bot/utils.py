@@ -1,63 +1,123 @@
-import time
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from smtplib import SMTP_SSL, SMTPException
 
 import emoji
-from thefuzz import fuzz, process
+from telegram import Message
+from thefuzz import fuzz
 
-from bot.constants.info.text import MAX_MESSAGES
-from bot.obscene_words import obscene_words
-
-
-pending_messages = {}
-processed_users = {}
-
-
-def increment_message_count(user_id, key):
-    # if value in pending_messages:
-    #     pending_messages[value] += 1
-    # return pending_messages[value]
-    processed_users[user_id][key] += 1
-    print(processed_users)
-    return processed_users[user_id][key]
+from bot.constants.info.text import MAX_MESSAGES, RATIO_LIMIT
+from bot.core.database import async_session
+from bot.core.db.crud import message_data_crud, message_filter_data_crud
+from bot.core.db.models import MessageData, MessageFilterData
+from bot.core.settings import settings
 
 
-def check_message_limit(message_count):
-    return message_count >= MAX_MESSAGES
+def send_email_message(message: str, subject: str, recipient: str) -> bool:
+    """Send email message to the specified curator email-address."""
+    msg = MIMEMultipart()
+    msg['From'] = settings.smtp_server_bot_email
+    msg['To'] = recipient
+    msg['Subject'] = subject
+    msg.attach(MIMEText(message, 'html'))
+    try:
+        with SMTP_SSL(
+            settings.smtp_server_address,
+            settings.smtp_server_port,
+        ) as mailserver:
+            if settings.debug:
+                mailserver.set_debuglevel(True)
+
+            mailserver.login(
+                settings.smtp_server_bot_email,
+                settings.smtp_server_bot_password,
+            )
+
+            mailserver.send_message(msg)
+        return True
+    except SMTPException:
+        return False
 
 
-def send_message_to_the_conversation(chat, text):
-    return chat.send_message(text=text)
-
-
-def replace_emoji_with_symbols(current, previous):
+def remove_emoji_from_text(current: str, previous: str) -> tuple[str, str]:
     current_text = emoji.replace_emoji(current, replace="")
     previous_text = emoji.replace_emoji(previous, replace="")
     return current_text, previous_text
 
 
-def find_obscene_words_in_a_message(message_text):
-    # понадобится словарь исключений
-    start = time.time()
-    words = [word for word in message_text if len(word) > 2]
-    best_matching = None
-    for word in words:
-        matching = process.extractOne(
-            word, obscene_words, scorer=fuzz.ratio, score_cutoff=89
+def fuzzy_string_matching(current_text: str, previous_text: str) -> bool:
+    ratio = fuzz.ratio(current_text, previous_text)
+    return ratio >= RATIO_LIMIT
+
+
+def check_message_limit(stickers_count: int) -> bool:
+    return stickers_count >= MAX_MESSAGES
+
+
+def preformatted_text(
+    current_text: str, previous_text: str
+) -> tuple[str, str]:
+    current_message_text = current_text.lower()
+    previous_message_text = previous_text.lower()
+    return remove_emoji_from_text(current_message_text, previous_message_text)
+
+
+async def get_community_member_from_db(user_id: int):
+    async with async_session() as session:
+        community_member = (
+            await message_filter_data_crud.get_message_filter_data_by_user_id(
+                user_id, session
+            )
         )
-        if matching is not None:
-            best_matching = matching
-            break
-    stop = time.time()
-    execution_time = stop - start
-    return best_matching, execution_time
+        return community_member
 
 
-def set_dict_key_to_zero(user_id, key):
-    processed_users[user_id][key] = 0
+async def create_community_member(
+    user_id: int,
+    message: Message,
+):
+    async with async_session() as session:
+        message_data = MessageData()
+
+        await message_data_crud.update_message_data_attrib(
+            message_data, message, session
+        )
+
+        community_member = MessageFilterData(
+            user_id=user_id, last_message=message_data, sticker_count=0
+        )
+
+        session.add(community_member)
+        await session.commit()
+        await session.refresh(community_member)
+        return community_member
 
 
-def initalize_user(user_id):
-    user_data = {
-        "sticker": 0,
-        "emoji": 0,
-    }
-    processed_users[user_id] = user_data
+async def update_community_member_data(
+    community_member: MessageFilterData,
+    message: Message,
+    time_diff: bool = False,
+):
+    async with async_session() as session:
+        message_id = community_member.last_message_id
+        message_data = await message_data_crud.get_message_data_by_id(
+            message_id, session
+        )
+
+        await message_data_crud.update_message_data_attrib(
+            message_data, message, session
+        )
+
+        sticker_count = community_member.sticker_count
+
+        if time_diff:
+            sticker_count += 1
+        else:
+            sticker_count = 0
+
+        community_member.sticker_count = sticker_count
+
+        session.add(community_member)
+        await session.commit()
+        await session.refresh(community_member)
+        return sticker_count

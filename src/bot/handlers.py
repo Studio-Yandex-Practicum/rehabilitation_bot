@@ -6,12 +6,12 @@ from telegram.ext import (
 )
 
 from bot.constants.state import MAIN_MENU
-# handle_messages_from_new_user
 from bot.conversations.main_application import (
-    handle_all_messages,
+    greet_new_member,
     main_menu,
+    manage_message_flooding,
     start,
-    welcome_new_user_in_group,
+    stop,
 )
 
 
@@ -27,27 +27,19 @@ main_handler = ConversationHandler(
             # uncomment after adding the menu manager
         ],
     },
-    fallbacks=[CommandHandler("menu", main_menu)],
+    fallbacks=[
+        CommandHandler("menu", main_menu),
+        CommandHandler("stop", stop),
+    ],
     allow_reentry=True,
 )
 
 
-message_filter_handler = MessageHandler(
-    filters.TEXT | filters.Sticker.ALL & (~filters.StatusUpdate.ALL),
-    handle_all_messages,
+greet_new_member_handler = MessageHandler(
+    filters.StatusUpdate.NEW_CHAT_MEMBERS, greet_new_member
 )
 
-# welcome_filter_handler = MessageHandler(
-#     filters.TEXT
-#     & (
-#         filters.Entity("url")
-#         | filters.Entity("text_link")
-#         | filters.Entity("email")
-#         | filters.Entity("mention")
-#     ),
-#     handle_messages_from_new_user,
-# )
-
-welcome_new_user_handler = MessageHandler(
-    filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome_new_user_in_group
+message_filter_handler = MessageHandler(
+    filters.TEXT | filters.Sticker.ALL & (~filters.StatusUpdate.ALL),
+    manage_message_flooding,
 )
