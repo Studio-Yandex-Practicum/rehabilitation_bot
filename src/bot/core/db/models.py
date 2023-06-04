@@ -31,7 +31,7 @@ class MessageData(Base):
 
     text = Column(String, default=None)
     sticker = Column(String, default=None)
-    date = Column(DateTime, default=datetime.datetime.now())
+    timestamp = Column(DateTime, default=datetime.datetime.now())
 
 
 class MessageFilterData(Base):
