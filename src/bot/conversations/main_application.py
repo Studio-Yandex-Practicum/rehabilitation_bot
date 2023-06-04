@@ -59,8 +59,8 @@ async def stop(
 async def mute_new_member(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE
-):
-    '''Mute a new member of the chat.'''
+) -> None:
+    """Mute a new member of the chat."""
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
     await context.bot.restrict_chat_member(
@@ -71,16 +71,16 @@ async def mute_new_member(
             can_send_media_messages=False,
         ),
     )
-    message = 'Для получения возможности отправлять \
-                сообщения пройдите анкетирование.'
+    message = ('Для получения возможности отправлять '
+               'сообщения пройдите анкетирование.')
     await update.effective_chat.send_message(message)
 
 
 async def unmute_new_member(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE
-):
-    '''Unmute a new member of the chat.'''
+) -> None:
+    """Unmute a new member of the chat."""
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
     await context.bot.restrict_chat_member(
@@ -91,6 +91,6 @@ async def unmute_new_member(
             can_send_media_messages=True,
         ),
     )
-    message = f'Уважаемый {update.effective_user.full_name},\
-        права доступа обновлены.'
+    message = (f'Уважаемый {update.effective_user.full_name}, '
+               'права доступа обновлены.')
     await update.effective_chat.send_message(message)
