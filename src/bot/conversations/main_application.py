@@ -61,7 +61,7 @@ async def manage_message_flooding(
     """
     current_message = update.message
     user_id = current_message.from_user.id
-    current_time = datetime.utcnow().replace(microsecond=0)
+    current_time = datetime.now().replace(microsecond=0)
     user_first_name = current_message.from_user.first_name
 
     community_member = await get_community_member_from_db(user_id)
@@ -73,9 +73,8 @@ async def manage_message_flooding(
     last_message = community_member.last_message
 
     if last_message.sticker and current_message.sticker:
-        previous_time = last_message.date
+        previous_time = last_message.timestamp
         elapsed_time = current_time - previous_time
-
         time_diff = elapsed_time < timedelta(seconds=30)
 
         message_count = await update_community_member_data(

@@ -131,4 +131,4 @@ dmypy.json
 .vscode/
 .idea/
 
-src/bot/core/db/sqlite.db
+*sqlite.db

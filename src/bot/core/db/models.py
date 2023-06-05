@@ -1,6 +1,4 @@
-import datetime
-
-from sqlalchemy import (  # create_engine,
+from sqlalchemy import (
     Column,
     DateTime,
     ForeignKey,
@@ -31,7 +29,7 @@ class MessageData(Base):
 
     text = Column(String, default=None)
     sticker = Column(String, default=None)
-    timestamp = Column(DateTime, default=datetime.datetime.now())
+    timestamp = Column(DateTime(timezone=True))
 
 
 class MessageFilterData(Base):

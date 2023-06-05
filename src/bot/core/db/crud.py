@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from telegram import Message
 
 from bot.core.db.models import MessageData, MessageFilterData
+from bot.core.db.schemas import MessageBase
 
 
 class CRUDBase:
@@ -30,11 +31,11 @@ class CRUDMessageData(CRUDBase):
         return db_obj.scalars().first()
 
     async def update_message_data_attrib(
-        self, object: MessageData, message: Message, session: AsyncSession
+        self, object: MessageBase, message: Message, session: AsyncSession
     ):
         object.text = getattr(message, "text", None)
         object.sticker = getattr(message.sticker, "emoji", None)
-        object.date = message.date
+        object.timestamp = message.date
         session.add(object)
         await session.commit()
         await session.refresh(object)
