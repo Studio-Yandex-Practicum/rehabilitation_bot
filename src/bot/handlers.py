@@ -3,7 +3,12 @@ from telegram.ext import (CallbackQueryHandler, CommandHandler,
 
 from bot.constants import callback, key, state
 from bot.constants.state import MAIN_MENU
-from bot.conversations.main_application import main_menu, start, stop
+from bot.conversations.main_application import (
+    greet_new_member,
+    main_menu,
+    start,
+    stop,
+)
 
 from bot.conversations import form_application
 from bot.conversations.main_application import greet_new_member
