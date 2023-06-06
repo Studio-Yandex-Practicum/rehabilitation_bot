@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from sqlalchemy import Column, Integer
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import declarative_base, declared_attr, sessionmaker
@@ -18,4 +20,22 @@ Base = declarative_base(cls=PreBase)
 
 engine = create_async_engine(settings.database_url)
 
-async_session = sessionmaker(engine, class_=AsyncSession)
+
+def async_session_generator():
+    return sessionmaker(
+        engine, class_=AsyncSession
+    )
+
+
+@asynccontextmanager
+async def async_session():
+    try:
+        get_async_session = async_session_generator()
+
+        async with get_async_session() as session:
+            yield session
+    except Exception:
+        await session.rollback()
+        raise
+    finally:
+        await session.close()
