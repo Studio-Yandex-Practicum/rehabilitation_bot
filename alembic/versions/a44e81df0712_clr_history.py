@@ -26,7 +26,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('message_filter_data',
-    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.BigInteger(), nullable=False),
     sa.Column('sticker_count', sa.Integer(), nullable=False),
     sa.Column('last_message_id', sa.Integer(), nullable=True),
     sa.Column('id', sa.Integer(), nullable=False),

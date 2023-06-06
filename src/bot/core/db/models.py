@@ -1,4 +1,5 @@
 from sqlalchemy import (
+    BigInteger,
     Column,
     DateTime,
     ForeignKey,
@@ -35,7 +36,7 @@ class MessageData(Base):
 class MessageFilterData(Base):
     __tablename__ = 'message_filter_data'
 
-    user_id = Column(Integer, unique=True, nullable=False)
+    user_id = Column(BigInteger, unique=True, nullable=False)
     sticker_count = Column(Integer(), nullable=False)
     last_message = relationship("MessageData", lazy="subquery")
     last_message_id = Column(Integer, ForeignKey('message_data.id'))
