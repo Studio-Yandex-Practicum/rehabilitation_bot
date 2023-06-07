@@ -3,10 +3,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from telegram import Message
 
 from bot.core.db.models import MessageData, MessageFilterData
-from bot.core.db.schemas import MessageBase
 
 
 class CRUDBase:
+    """CRUD Base class for database operations."""
+
     def __init__(self, model):
         self.model = model
 
@@ -22,6 +23,8 @@ class CRUDBase:
 
 
 class CRUDMessageData(CRUDBase):
+    """CRUD operations for MessageData objects."""
+
     async def get_message_data_by_id(
         self, message_id: int, session: AsyncSession
     ):
@@ -31,7 +34,7 @@ class CRUDMessageData(CRUDBase):
         return db_obj.scalars().first()
 
     async def update_message_data_attrib(
-        self, object: MessageBase, message: Message, session: AsyncSession
+        self, object: MessageData, message: Message, session: AsyncSession
     ):
         object.text = getattr(message, "text", None)
         object.sticker = getattr(message.sticker, "emoji", None)
@@ -43,6 +46,8 @@ class CRUDMessageData(CRUDBase):
 
 
 class CRUDMessageFilterData(CRUDBase):
+    """CRUD operations for MessageFilterData objects."""
+
     async def get_message_filter_data_by_user_id(
         self, user_id: int, session: AsyncSession
     ):

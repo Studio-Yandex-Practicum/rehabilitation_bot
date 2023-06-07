@@ -6,17 +6,17 @@ from dotenv import load_dotenv
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
-from bot.core.db.base import Base   # noqa
+from bot.core.db.base import Base  # noqa
 
 from alembic import context
 
-load_dotenv('.env')
+load_dotenv(".env")
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
-config.set_main_option('sqlalchemy.url', os.environ['DATABASE_URL'])
+config.set_main_option("sqlalchemy.url", os.environ["DATABASE_URL"])
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
