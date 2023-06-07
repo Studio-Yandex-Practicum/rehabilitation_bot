@@ -22,10 +22,10 @@ from bot.core.settings import settings
 def send_email_message(message: str, subject: str, recipient: str) -> bool:
     """Send email message to the specified curator email-address."""
     msg = MIMEMultipart()
-    msg["From"] = settings.smtp_server_bot_email
-    msg["To"] = recipient
-    msg["Subject"] = subject
-    msg.attach(MIMEText(message, "html"))
+    msg['From'] = settings.smtp_server_bot_email
+    msg['To'] = recipient
+    msg['Subject'] = subject
+    msg.attach(MIMEText(message, 'html'))
     try:
         with SMTP_SSL(
             settings.smtp_server_address,
