@@ -18,10 +18,10 @@
 ---
 
 ## What is Rehabilitation Bot?
-
+Rehabilitation Bot is a Telegram bot that helps users create a healthy community between rehabilitation professionals, as well as between those who would like to be aware of rehabilitation techniques.
 
 ## How does it work?
-
+To use Rehabilitation Bot, simply add it to your Telegram contacts and start chatting with it. When you can add the bot to the selected channel as an administrator, the bot will be able to moderate chat and filter chat participants.
 
 ## How to Setup?
 
