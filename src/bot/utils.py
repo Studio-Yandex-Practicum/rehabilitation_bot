@@ -1,15 +1,21 @@
+import json
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from smtplib import SMTP_SSL, SMTPException
 
 import emoji
+from sqlalchemy.ext.asyncio import AsyncSession
 from telegram import Message
 from thefuzz import fuzz
 
 from bot.constants.info.text import MAX_MESSAGES, RATIO_LIMIT
 from bot.core.database import async_session
-from bot.core.db.crud import message_data_crud, message_filter_data_crud
-from bot.core.db.models import MessageData, MessageFilterData
+from bot.core.db.crud import (
+    CRUDBase,
+    message_data_crud,
+    message_filter_data_crud,
+)
+from bot.core.db.models import MessageData, MessageFilterData, ObsceneWordData
 from bot.core.settings import settings
 
 
@@ -121,3 +127,29 @@ async def update_community_member_data(
         await session.commit()
         await session.refresh(community_member)
         return sticker_count
+
+
+async def check_existing_records(obscene_list: list, session: AsyncSession):
+    objects = await CRUDBase(ObsceneWordData).get_multi(session)
+    wordlist = [obj.word for obj in objects]
+    new_list = [word for word in obscene_list if word not in wordlist]
+    return new_list
+
+
+async def update_obscene_words_db_table():
+    async with async_session() as session:
+        with open(settings.obscene_json, "r") as json_file:
+            obscene_list = json.load(json_file)
+            updated_list = await check_existing_records(obscene_list, session)
+            unique_list = []
+            [
+                unique_list.append(word)
+                for word in updated_list
+                if word not in unique_list
+            ]
+            objects = [
+                ObsceneWordData(word=object) for object in unique_list
+            ]
+            session.add_all(objects)
+            await session.commit()
+            await session.close()

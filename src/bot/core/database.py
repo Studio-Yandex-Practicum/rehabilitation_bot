@@ -1,8 +1,12 @@
 from contextlib import asynccontextmanager
 
 from sqlalchemy import Column, Integer
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import declarative_base, declared_attr, sessionmaker
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
+from sqlalchemy.orm import declarative_base, declared_attr
 
 from bot.core.settings import settings
 
@@ -22,7 +26,7 @@ engine = create_async_engine(settings.database_url)
 
 
 def async_session_generator():
-    return sessionmaker(
+    return async_sessionmaker(
         engine, class_=AsyncSession
     )
 

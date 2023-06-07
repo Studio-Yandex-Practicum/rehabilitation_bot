@@ -12,6 +12,7 @@ from bot.conversations.main_application import (
     manage_message_flooding,
     start,
     stop,
+    update_obscene,
 )
 from bot.conversations.moderation_application import (
     chat_moderation,
@@ -22,6 +23,7 @@ from bot.conversations.moderation_application import (
 main_handler = ConversationHandler(
     entry_points=[
         CommandHandler("start", start),
+        CommandHandler("update_obscene", update_obscene),
     ],
     states={
         MAIN_MENU: [

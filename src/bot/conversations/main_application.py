@@ -21,6 +21,7 @@ from bot.utils import (
     get_community_member_from_db,
     preformatted_text,
     update_community_member_data,
+    update_obscene_words_db_table,
 )
 
 
@@ -98,3 +99,8 @@ async def manage_message_flooding(
             )
 
     await update_community_member_data(community_member, current_message)
+
+
+async def update_obscene(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update_obscene_words_db_table()
+    await update.effective_chat.send_message("obscene values updated")

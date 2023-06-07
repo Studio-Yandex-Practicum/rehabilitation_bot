@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     email_curator: str = ''
 
     database_url: str
+    obscene_json: str
 
     class Config:
         env_file = '.env'

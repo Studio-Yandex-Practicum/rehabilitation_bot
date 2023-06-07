@@ -4,25 +4,11 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Integer,
-    MetaData,
     String,
-    Table,
 )
 from sqlalchemy.orm import relationship
 
 from bot.core.database import Base
-
-
-# engine = create_engine('sqlite:///sqlite3.db')
-# engine.connect()
-
-meta = MetaData()
-
-obscene_language = Table(
-    'Obscene_language', meta,
-    Column('id', Integer, primary_key=True),
-    Column('The_forbidden_word', String(50), unique=True)
-)
 
 
 class MessageData(Base):
@@ -43,3 +29,12 @@ class MessageFilterData(Base):
 
     def __repr__(self):
         return f"{self.user_id}, {self.sticker_count}, {self.last_message}"
+
+
+class ObsceneWordData(Base):
+    __tablename__ = 'obscene_words'
+
+    word: str = Column(String(25), unique=True)
+
+    def __repr__(self):
+        return f"id={self.id} word={self.word}"
