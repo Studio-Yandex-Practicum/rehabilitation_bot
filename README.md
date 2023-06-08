@@ -82,6 +82,18 @@ UNIX:
  source .venv/bin/activate
 ```
 </details>
+
+  After installing Poetry, you need to create a .env file with the telegram bot token:
+```
+  telegram_token=put_telegram_bot_token_here
+```
+
+Now you can run the bot with the following command while in the bot directory:
+```
+  python application.py
+```
+At this stage the bot is running, and you can simply invite it to the target server and give it administrator rights.
+
 </details>
 
 
