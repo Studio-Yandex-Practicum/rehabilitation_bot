@@ -133,3 +133,4 @@ dmypy.json
 
 *sqlite.db
 *.json
+telegram_bot.db

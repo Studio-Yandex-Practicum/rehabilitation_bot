@@ -1,5 +1,3 @@
-# import datetime
-import json
 import re
 import string
 
@@ -8,9 +6,9 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB
 
+from bot.core.database import async_session
+from bot.utils import get_all_obscene_words
 
-forbidden_words = json.load(open('src/bot/forbidden_words.json'))
-# forbidden_words = json.load(open('russian_words.json'))
 
 # Подготовка данных
 data = pd.read_csv("src/bot/conversations/spam.csv", encoding="utf-8")
@@ -24,7 +22,6 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, random_state=0)
 # Преобразование текста в числовые признаки
 vectorizer = CountVectorizer()
 X_train_counts = vectorizer.fit_transform(x_train)
-# X_test_counts = vectorizer.transform(x_test)
 
 # Обучение модели
 
@@ -33,13 +30,12 @@ nb = MultinomialNB().fit(X_train_counts, y_train)
 
 async def chat_moderation(update, context):
     """Function for moderating the conversation"""
-    # start_time = datetime.datetime.now()
     text = update.message.text
     text_no_digital = re.sub('[0-9]', '', text)
+    async with async_session() as session:
+        forbidden_words = await get_all_obscene_words(session)
     if any(word.lower().translate(str.maketrans('', '', string.punctuation))
-           in forbidden_words for word in text_no_digital.split(' ')):
-        # end_time = datetime.datetime.now()
-        # print(end_time-start_time)
+            in forbidden_words for word in text_no_digital.split(' ')):
         await update.effective_chat.send_message(
             text='Нецензурная лексика у нас под запретом!'
         )
