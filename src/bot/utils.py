@@ -1,3 +1,4 @@
+import json
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from smtplib import SMTP_SSL, SMTPException
@@ -8,18 +9,22 @@ from thefuzz import fuzz
 
 from bot.constants.info.text import MAX_MESSAGES, RATIO_LIMIT
 from bot.core.database import async_session
-from bot.core.db.crud import message_data_crud, message_filter_data_crud
-from bot.core.db.models import MessageData, MessageFilterData
+from bot.core.db.crud import (
+    CRUDBase,
+    message_data_crud,
+    message_filter_data_crud,
+)
+from bot.core.db.models import MessageData, MessageFilterData, ObsceneWordData
 from bot.core.settings import settings
 
 
 def send_email_message(message: str, subject: str, recipient: str) -> bool:
     """Send email message to the specified curator email-address."""
     msg = MIMEMultipart()
-    msg['From'] = settings.smtp_server_bot_email
-    msg['To'] = recipient
-    msg['Subject'] = subject
-    msg.attach(MIMEText(message, 'html'))
+    msg["From"] = settings.smtp_server_bot_email
+    msg["To"] = recipient
+    msg["Subject"] = subject
+    msg.attach(MIMEText(message, "html"))
     try:
         with SMTP_SSL(
             settings.smtp_server_address,
@@ -40,29 +45,34 @@ def send_email_message(message: str, subject: str, recipient: str) -> bool:
 
 
 def remove_emoji_from_text(current: str, previous: str) -> tuple[str, str]:
+    """Remove emojis from text."""
     current_text = emoji.replace_emoji(current, replace="")
     previous_text = emoji.replace_emoji(previous, replace="")
     return current_text, previous_text
 
 
 def fuzzy_string_matching(current_text: str, previous_text: str) -> bool:
+    """Perform fuzzy string matching."""
     ratio = fuzz.ratio(current_text, previous_text)
     return ratio >= RATIO_LIMIT
 
 
 def check_message_limit(stickers_count: int) -> bool:
+    """Check if the sticker count exceeds the maximum message limit."""
     return stickers_count >= MAX_MESSAGES
 
 
 def preformatted_text(
     current_text: str, previous_text: str
 ) -> tuple[str, str]:
+    """Preformat text by converting it to lowercase and removing emojis."""
     current_message_text = current_text.lower()
     previous_message_text = previous_text.lower()
     return remove_emoji_from_text(current_message_text, previous_message_text)
 
 
-async def get_community_member_from_db(user_id: int):
+async def get_community_member_from_db(user_id: int) -> MessageFilterData:
+    """Retrieve community member object from database."""
     async with async_session() as session:
         community_member = (
             await message_filter_data_crud.get_message_filter_data_by_user_id(
@@ -73,9 +83,9 @@ async def get_community_member_from_db(user_id: int):
 
 
 async def create_community_member(
-    user_id: int,
-    message: Message,
-):
+    user_id: int, message: Message
+) -> MessageFilterData:
+    """Creates a new community member and saves their last message data."""
     async with async_session() as session:
         message_data = MessageData()
 
@@ -97,7 +107,8 @@ async def update_community_member_data(
     community_member: MessageFilterData,
     message: Message,
     time_diff: bool = False,
-):
+) -> int:
+    """Update community member data."""
     async with async_session() as session:
         message_id = community_member.last_message_id
         message_data = await message_data_crud.get_message_data_by_id(
@@ -121,3 +132,27 @@ async def update_community_member_data(
         await session.commit()
         await session.refresh(community_member)
         return sticker_count
+
+
+async def get_obscene_words_from_db() -> list[str]:
+    """Retrieve obscene words from the database."""
+    async with async_session() as session:
+        objects = await CRUDBase(ObsceneWordData).get_multi(session)
+        wordlist = [obj.word for obj in objects]
+        await session.close()
+        return wordlist
+
+
+async def update_obscene_words_db_table() -> None:
+    """Update obscene words database table."""
+    async with async_session() as session:
+        with open(settings.obscene_json, "r") as json_file:
+            obscene_list = json.load(json_file)
+            from_db_list = await get_obscene_words_from_db()
+            unique_list = [
+                word for word in obscene_list if word not in from_db_list
+            ]
+            objects = [ObsceneWordData(word=object) for object in unique_list]
+            session.add_all(objects)
+            await session.commit()
+            await session.close()
