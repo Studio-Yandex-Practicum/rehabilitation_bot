@@ -6,8 +6,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB
 
-from bot.core.database import async_session
-from bot.utils import get_all_obscene_words
+from bot.utils import get_obscene_words_from_db
 
 
 # Подготовка данных
@@ -32,8 +31,7 @@ async def chat_moderation(update, context):
     """Function for moderating the conversation"""
     text = update.message.text
     text_no_digital = re.sub('[0-9]', '', text)
-    async with async_session() as session:
-        forbidden_words = await get_all_obscene_words(session)
+    forbidden_words = await get_obscene_words_from_db()
     if any(word.lower().translate(str.maketrans('', '', string.punctuation))
             in forbidden_words for word in text_no_digital.split(' ')):
         await update.effective_chat.send_message(
