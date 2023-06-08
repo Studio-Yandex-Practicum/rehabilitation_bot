@@ -4,7 +4,6 @@ from email.mime.text import MIMEText
 from smtplib import SMTP_SSL, SMTPException
 
 import emoji
-from sqlalchemy.ext.asyncio import AsyncSession
 from telegram import Message
 from thefuzz import fuzz
 
@@ -22,10 +21,10 @@ from bot.core.settings import settings
 def send_email_message(message: str, subject: str, recipient: str) -> bool:
     """Send email message to the specified curator email-address."""
     msg = MIMEMultipart()
-    msg['From'] = settings.smtp_server_bot_email
-    msg['To'] = recipient
-    msg['Subject'] = subject
-    msg.attach(MIMEText(message, 'html'))
+    msg["From"] = settings.smtp_server_bot_email
+    msg["To"] = recipient
+    msg["Subject"] = subject
+    msg.attach(MIMEText(message, "html"))
     try:
         with SMTP_SSL(
             settings.smtp_server_address,
@@ -135,20 +134,13 @@ async def update_community_member_data(
         return sticker_count
 
 
-async def get_obscene_words_from_db(session: AsyncSession) -> list[str]:
+async def get_obscene_words_from_db() -> list[str]:
     """Retrieve obscene words from the database."""
-    objects = await CRUDBase(ObsceneWordData).get_multi(session)
-    wordlist = [obj.word for obj in objects]
-    return wordlist
-
-
-async def check_existing_records(
-    obscene_list: list, session: AsyncSession
-) -> list[str]:
-    """Check existing records for obscene wordlist."""
-    wordlist = await get_obscene_words_from_db(session)
-    new_list = [word for word in obscene_list if word not in wordlist]
-    return new_list
+    async with async_session() as session:
+        objects = await CRUDBase(ObsceneWordData).get_multi(session)
+        wordlist = [obj.word for obj in objects]
+        await session.close()
+        return wordlist
 
 
 async def update_obscene_words_db_table() -> None:
@@ -156,12 +148,9 @@ async def update_obscene_words_db_table() -> None:
     async with async_session() as session:
         with open(settings.obscene_json, "r") as json_file:
             obscene_list = json.load(json_file)
-            updated_list = await check_existing_records(obscene_list, session)
-            unique_list = []
-            [
-                unique_list.append(word)
-                for word in updated_list
-                if word not in unique_list
+            from_db_list = await get_obscene_words_from_db()
+            unique_list = [
+                word for word in obscene_list if word not in from_db_list
             ]
             objects = [ObsceneWordData(word=object) for object in unique_list]
             session.add_all(objects)
