@@ -112,6 +112,7 @@ async def manage_message_flooding(
             await update.effective_chat.send_message(
                     text=(
                         f"found '{matching[0]}'. matching {matching[1]}\n"
+                        f"message deleted\n"
                         f"execution time is {round(execution_time, 5)} sec"
                     ),
                 )
