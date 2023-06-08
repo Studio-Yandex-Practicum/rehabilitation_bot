@@ -86,7 +86,7 @@ async def get_community_member_from_db(user_id: int) -> MessageFilterData:
 async def create_community_member(
     user_id: int, message: Message
 ) -> MessageFilterData:
-    """Creates a new community member and saves their last post data."""
+    """Creates a new community member and saves their last message data."""
     async with async_session() as session:
         message_data = MessageData()
 
@@ -135,12 +135,18 @@ async def update_community_member_data(
         return sticker_count
 
 
+async def get_obscene_words_from_db(session: AsyncSession) -> list[str]:
+    """Retrieve obscene words from the database."""
+    objects = await CRUDBase(ObsceneWordData).get_multi(session)
+    wordlist = [obj.word for obj in objects]
+    return wordlist
+
+
 async def check_existing_records(
     obscene_list: list, session: AsyncSession
 ) -> list[str]:
     """Check existing records for obscene wordlist."""
-    objects = await CRUDBase(ObsceneWordData).get_multi(session)
-    wordlist = [obj.word for obj in objects]
+    wordlist = await get_obscene_words_from_db(session)
     new_list = [word for word in obscene_list if word not in wordlist]
     return new_list
 
