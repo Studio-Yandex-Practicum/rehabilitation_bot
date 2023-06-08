@@ -1,11 +1,12 @@
 import json
+import time
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from smtplib import SMTP_SSL, SMTPException
 
 import emoji
 from telegram import Message
-from thefuzz import fuzz
+from thefuzz import fuzz, process
 
 from bot.constants.info.text import MAX_MESSAGES, RATIO_LIMIT
 from bot.core.database import async_session
@@ -156,3 +157,21 @@ async def update_obscene_words_db_table() -> None:
             session.add_all(objects)
             await session.commit()
             await session.close()
+
+
+async def find_obscene_words_in_a_message(message_text):
+    # понадобится словарь исключений
+    start = time.time()
+    obscene_words = await get_obscene_words_from_db()
+    words = [word for word in message_text if len(word) > 2]
+    best_matching = None
+    for word in words:
+        matching = process.extractOne(
+            word, obscene_words, scorer=fuzz.ratio, score_cutoff=89
+        )
+        if matching is not None:
+            best_matching = matching
+            break
+    stop = time.time()
+    execution_time = stop - start
+    return best_matching, execution_time

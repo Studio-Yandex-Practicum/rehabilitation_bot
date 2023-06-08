@@ -17,6 +17,7 @@ from bot.conversations.menu_application import menu
 from bot.utils import (
     check_message_limit,
     create_community_member,
+    find_obscene_words_in_a_message,
     fuzzy_string_matching,
     get_community_member_from_db,
     preformatted_text,
@@ -61,7 +62,12 @@ async def manage_message_flooding(
     text similarity and tracking the number of stickers sent by each user.
     """
     current_message = update.message
-    user_id = current_message.from_user.id
+    user = current_message.from_user
+
+    if user.is_bot:
+        return
+
+    user_id = user.id
     current_time = datetime.now().replace(microsecond=0)
     user_first_name = current_message.from_user.first_name
 
@@ -97,6 +103,18 @@ async def manage_message_flooding(
             await current_message.reply_text(
                 text=FLOOD_MESSAGE.format(user_first_name)
             )
+
+        matching, execution_time = await find_obscene_words_in_a_message(
+            current_message.text.lower().split()
+        )
+
+        if matching is not None:
+            await update.effective_chat.send_message(
+                    text=(
+                        f"found '{matching[0]}'. matching {matching[1]}\n"
+                        f"execution time is {round(execution_time, 5)} sec"
+                    ),
+                )
 
     await update_community_member_data(community_member, current_message)
 
