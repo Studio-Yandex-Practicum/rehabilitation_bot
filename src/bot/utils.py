@@ -2,7 +2,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from smtplib import SMTP_SSL, SMTPException
 
-from bot.core.settings import settings
+from src.bot.core.settings import settings
 
 
 def send_email_message(message: str, subject: str, recipient: str) -> bool:

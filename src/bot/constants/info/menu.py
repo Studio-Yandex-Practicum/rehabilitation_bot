@@ -1,4 +1,4 @@
-from bot.constants import key
+from src.bot.constants import key
 
 
 MAIN_MENU = {
@@ -7,6 +7,7 @@ MAIN_MENU = {
         key.DESCRIPTION: "Временное описание кнопки главного меню",
         key.MENU: [
             f"{key.MENU}_SUB",
+            f"{key.MENU}_SUB2",
         ],
     }
 }
@@ -23,9 +24,18 @@ SUBMENU = {
     f"{key.MENU}_SUB2": {
         key.NAME: "Кнопка 2",
         key.DESCRIPTION: "Описание 2",
-        key.PARENT: f"{key.MENU}_SUB",
+        key.PARENT: f"{key.MENU}_MAIN",
+        key.MENU: [
+            f"{key.MENU}_SUB3",
+        ],
     },
+    f"{key.MENU}_SUB3": {
+        key.NAME: "Назад",
+        key.DESCRIPTION: "Описание 3",
+        key.PARENT: f"{key.MENU}_MAIN",
+    }
 }
+
 
 ALL_MENU = {
     **MAIN_MENU,
