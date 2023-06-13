@@ -21,7 +21,7 @@ REGEX_FULL_NAME = r"^([А-Яа-яЁё\-]+\b {,3}){2,}$"
 
 # MESSAGE FILTER
 MAX_MESSAGES = 3
-RATIO_LIMIT = 94
+RATIO_LIMIT = 89
 FLOOD_MESSAGE = (
     "Привет, {}! Будем благодарны, если сделаете ваши "
     "сообщения в чате более разнообразными и креативными. Это сделает "

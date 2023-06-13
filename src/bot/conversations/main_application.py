@@ -1,6 +1,4 @@
-from datetime import datetime, timedelta
-
-from telegram import Update
+from telegram import ChatPermissions, Update
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
 
@@ -8,21 +6,12 @@ from bot.constants import state
 # from bot.constants.info.menu import ALL_MENU
 # uncomment after adding the menu manager
 from bot.constants.info.text import (
-    FLOOD_MESSAGE,
     START_MESSAGE,
     STOP_MESSAGE,
     WELCOME_MESSAGE,
 )
 from bot.conversations.menu_application import menu
-from bot.utils import (
-    check_message_limit,
-    create_community_member,
-    fuzzy_string_matching,
-    get_community_member_from_db,
-    preformatted_text,
-    update_community_member_data,
-    update_obscene_words_db_table,
-)
+from bot.utils import update_obscene_words_db_table
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -38,13 +27,17 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return state.MAIN_MENU
 
 
-async def greet_new_member(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def greet_new_member(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
     """Greeting a new member of the group."""
     user_first_name = update.effective_user.full_name
     welcome_message = WELCOME_MESSAGE.format(user_first_name)
+
     await update.effective_chat.send_message(
         welcome_message, parse_mode=ParseMode.HTML
     )
+    await mute_new_member(update, context)
 
 
 async def stop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -53,54 +46,57 @@ async def stop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     return ConversationHandler.END
 
 
-async def manage_message_flooding(
+async def mute_new_member(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> None:
-    """
-    Monitoring and managing message flooding and sticker usage by comparing
-    text similarity and tracking the number of stickers sent by each user.
-    """
-    current_message = update.message
-    user_id = current_message.from_user.id
-    current_time = datetime.now().replace(microsecond=0)
-    user_first_name = current_message.from_user.first_name
+    """Mute a new member of the chat."""
+    chat_id = update.effective_chat.id
+    user_id = update.effective_user.id
+    await context.bot.restrict_chat_member(
+        chat_id=chat_id,
+        user_id=user_id,
+        permissions=ChatPermissions(
+            can_send_messages=False,
+            can_send_media_messages=False,
+        ),
+    )
+    message = (
+        "Для получения возможности отправлять "
+        "сообщения пройдите анкетирование."
+    )
+    await update.effective_chat.send_message(message)
 
-    community_member = await get_community_member_from_db(user_id)
 
-    if not community_member:
-        await create_community_member(user_id, current_message)
+async def unmute_new_member(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
+    """Unmute a new member of the chat."""
+    chat_id = update.effective_chat.id
+    user_id = update.effective_user.id
+    await context.bot.restrict_chat_member(
+        chat_id=chat_id,
+        user_id=user_id,
+        permissions=ChatPermissions(
+            can_send_messages=True,
+            can_send_media_messages=True,
+        ),
+    )
+    message = (
+        f"Уважаемый {update.effective_user.full_name}, "
+        "права доступа обновлены."
+    )
+    await update.effective_chat.send_message(message)
+
+
+async def update_moderation_db(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
+    chat_id = update.effective_chat.id
+    user_id = update.effective_user.id
+    chat_member = await context.bot.get_chat_member(chat_id, user_id)
+
+    if chat_member.status not in ["administrator", "creator"]:
         return
 
-    last_message = community_member.last_message
-
-    if last_message.sticker and current_message.sticker:
-        previous_time = last_message.timestamp
-        elapsed_time = current_time - previous_time
-        time_diff = elapsed_time < timedelta(seconds=30)
-
-        message_count = await update_community_member_data(
-            community_member, current_message, time_diff
-        )
-
-        if check_message_limit(message_count):
-            await current_message.reply_text(
-                text=FLOOD_MESSAGE.format(user_first_name)
-            )
-        return
-
-    if last_message.text and current_message.text:
-        current_text, previous_text = preformatted_text(
-            current_message.text, last_message.text
-        )
-
-        if fuzzy_string_matching(current_text, previous_text):
-            await current_message.reply_text(
-                text=FLOOD_MESSAGE.format(user_first_name)
-            )
-
-    await update_community_member_data(community_member, current_message)
-
-
-async def update_obscene(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update_obscene_words_db_table()
-    await update.effective_chat.send_message("obscene values updated")
+    await update.message.reply_text("db updated")

@@ -1,32 +1,68 @@
 from telegram.ext import (
+    CallbackQueryHandler,
     CommandHandler,
     ConversationHandler,
     MessageHandler,
     filters,
 )
 
+from bot.constants import callback, key, state
 from bot.constants.state import MAIN_MENU
+from bot.conversations import form_application
 from bot.conversations.main_application import (
     greet_new_member,
     main_menu,
-    manage_message_flooding,
     start,
     stop,
-    update_obscene,
+    update_moderation_db,
 )
 from bot.conversations.moderation_application import (
     chat_moderation,
     chat_moderation_spam,
+    manage_message_flooding,
+)
+
+
+form_handler = ConversationHandler(
+    entry_points=[
+        CallbackQueryHandler(
+            form_application.start_form, pattern=callback.START_FORM
+        )
+    ],
+    states={
+        state.FORM_SUBMISSION: [
+            CallbackQueryHandler(
+                form_application.edit_menu, pattern=callback.EDIT_MENU
+            ),
+            CallbackQueryHandler(
+                form_application.send_data, pattern=callback.SEND_DATA
+            ),
+        ],
+        state.FORM_INPUT: [
+            CallbackQueryHandler(
+                form_application.show_data, pattern=callback.SHOW_DATA
+            ),
+            CallbackQueryHandler(
+                form_application.edit_data, pattern=rf"^{key.ASK}_\S*$"
+            ),
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND, form_application.save_data
+            ),
+        ],
+    },
+    fallbacks=[CommandHandler("menu", main_menu)],
+    allow_reentry=True,
 )
 
 
 main_handler = ConversationHandler(
     entry_points=[
         CommandHandler("start", start),
-        CommandHandler("update_obscene", update_obscene),
+        CommandHandler("upd_mod_db", update_moderation_db),
     ],
     states={
         MAIN_MENU: [
+            form_handler,
             # CallbackQueryHandler(
             # menu_application.menu, pattern=fr"^{key.MENU}_\S*$"
             # ),
@@ -41,15 +77,9 @@ main_handler = ConversationHandler(
 )
 
 
-moderation_handler = MessageHandler(
-    filters.TEXT,
-    chat_moderation
-)
+moderation_handler = MessageHandler(filters.TEXT, chat_moderation)
 
-moderation_spam_handler = MessageHandler(
-    filters.TEXT,
-    chat_moderation_spam
-)
+moderation_spam_handler = MessageHandler(filters.TEXT, chat_moderation_spam)
 
 greet_new_member_handler = MessageHandler(
     filters.StatusUpdate.NEW_CHAT_MEMBERS, greet_new_member
