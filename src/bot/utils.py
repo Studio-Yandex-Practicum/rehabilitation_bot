@@ -5,6 +5,7 @@ from email.mime.text import MIMEText
 from smtplib import SMTP_SSL, SMTPException
 
 import emoji
+from pandas import DataFrame
 from sqlalchemy.exc import NoResultFound
 from telegram import Message
 from thefuzz import fuzz
@@ -141,13 +142,12 @@ async def update_community_member_data(
         return sticker_count
 
 
-async def get_obscene_words_from_db() -> list[str]:
-    """Retrieve obscene words from the database."""
+async def get_multiple_records_from_db(model):
+    """Retrieve multiple records from the database."""
     async with async_session() as session:
-        objects = await CRUDBase(ObsceneWordData).get_multi(session)
-        wordlist = [obj.word for obj in objects]
+        objects = await CRUDBase(model).get_multi(session)
         await session.close()
-        return wordlist
+        return objects
 
 
 async def update_obscene_words_db_table() -> None:
@@ -155,9 +155,10 @@ async def update_obscene_words_db_table() -> None:
     async with async_session() as session:
         with open(settings.obscene_file, "r") as json_file:
             obscene_list = json.load(json_file)
-            from_db_list = await get_obscene_words_from_db()
+            objects = await get_multiple_records_from_db(ObsceneWordData)
+            wordlist = [obj.word for obj in objects]
             unique_list = [
-                word for word in obscene_list if word not in from_db_list
+                word for word in obscene_list if word not in wordlist
             ]
             objects = [ObsceneWordData(word=object) for object in unique_list]
             session.add_all(objects)
@@ -165,7 +166,8 @@ async def update_obscene_words_db_table() -> None:
             await session.close()
 
 
-async def insert_spam_ml_data_to_db_table():
+async def insert_spam_ml_data_to_db_table() -> None:
+    """Update spam ml data database table."""
     async with async_session() as session:
         with open(settings.spam_file, "r") as csv_file:
             spam_data_list = csv.reader(csv_file)
@@ -189,3 +191,11 @@ async def get_first_object_from_db(model):
             return None
         finally:
             await session.close()
+
+
+async def get_dataframe() -> DataFrame:
+    """Retrieves data from the database and returns a DataFrame object."""
+    objs = await get_multiple_records_from_db(SpamMLData)
+    attr_list = [[obj.cls, obj.text] for obj in objs]
+    data = DataFrame(attr_list, columns=["class", "text"])
+    return data

@@ -1,8 +1,8 @@
+import asyncio
 import re
 import string
 from datetime import datetime, timedelta
 
-import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB
@@ -10,31 +10,27 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from bot.constants.info.text import FLOOD_MESSAGE
-from bot.core.settings import settings
+from bot.core.db.models import ObsceneWordData
 from bot.utils import (
     check_message_limit,
     create_community_member,
     fuzzy_string_matching,
     get_community_member_from_db,
-    get_obscene_words_from_db,
+    get_dataframe,
+    get_multiple_records_from_db,
     preformatted_text,
     update_community_member_data,
 )
 
 
-# Подготовка данных
-data = pd.read_csv(settings.spam_file, encoding="utf-8")
-data.drop(data.iloc[:, 2:5], inplace=True, axis=1)
-data.rename(columns={"v1": "class", "v2": "text"}, inplace=True)
+loop = asyncio.get_event_loop()
+data = loop.run_until_complete(get_dataframe())
 x = data["text"]
 y = data["class"]
 x_train, x_test, y_train, y_test = train_test_split(x, y, random_state=0)
 
-# Преобразование текста в числовые признаки
 vectorizer = CountVectorizer()
 X_train_counts = vectorizer.fit_transform(x_train)
-
-# Обучение модели
 
 nb = MultinomialNB().fit(X_train_counts, y_train)
 
@@ -43,7 +39,8 @@ async def chat_moderation(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Function for moderating the conversation"""
     text = update.message.text
     text_no_digital = re.sub("[0-9]", "", text)
-    forbidden_words = await get_obscene_words_from_db()
+    forbidden_objs = await get_multiple_records_from_db(ObsceneWordData)
+    forbidden_words = [obj.word for obj in forbidden_objs]
     if any(
         word.lower().translate(str.maketrans("", "", string.punctuation))
         in forbidden_words
