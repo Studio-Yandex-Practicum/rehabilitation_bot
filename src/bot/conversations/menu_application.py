@@ -1,39 +1,35 @@
-from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
+from telegram import InlineKeyboardButton as Button
+from telegram import InlineKeyboardMarkup as Keyboard
+from telegram import Update
 from telegram.ext import ContextTypes
 
-from src.bot.constants.info.menu import ALL_MENU, MAIN_MENU
+from bot.constants import key, state
+from bot.constants.info import text
+from bot.constants.info.menu import ALL_MENU
+from bot.utils import send_message
 
 
 async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    chat_id = update.message.chat_id
+    """Show the selected menu or sub-menu to the user."""
 
-    # Получаем текущее меню пользователя из контекста
-    current_menu = context.user_data.get('current_menu', 'MENU_MAIN')
+    callback = update.callback_query
+    user_data = context.user_data
 
-    # Получаем информацию о текущем меню
-    menu_info = ALL_MENU.get(current_menu)
+    if callback and callback.data and callback.data.startswith(key.MENU):
+        menu = ALL_MENU[callback.data]
+        user_data[key.MENU] = menu
+    else:
+        menu = user_data[key.MENU]
 
-    # Формируем сообщение
-    message_text = menu_info['DESCRIPTION']
+    buttons = [
+        [Button(text=ALL_MENU[menu_name][key.NAME], callback_data=menu_name)]
+        for menu_name in menu.get(key.MENU, [])
+    ]
+    if parent_menu := menu.get(key.PARENT):
+        buttons.append([Button(text=text.BACK, callback_data=parent_menu)])
 
-    # Создаем кнопки на основе дочерних меню
-    keyboard = []
-    for child_menu in menu_info['MENU']:
-        child_menu_info = ALL_MENU.get(child_menu)
-        button = KeyboardButton(child_menu_info[key.NAME])
-        keyboard.append([button])
+    menu_keyboard = Keyboard(buttons)
 
-    # Добавляем кнопку "Назад" на основе родительского меню
-    parent_menu = menu_info.get('PARENT')
-    if parent_menu:
-        parent_menu_info = ALL_MENU.get(parent_menu)
-        back_button = KeyboardButton("Назад")
-        keyboard.append([back_button])
+    await send_message(update, menu[key.DESCRIPTION], keyboard=menu_keyboard)
 
-    # Формируем и отправляем сообщение с кнопками
-    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-    await context.bot.send_message(
-        chat_id=chat_id,
-        text=message_text,
-        reply_markup=reply_markup
-    )
+    return state.MAIN_MENU
