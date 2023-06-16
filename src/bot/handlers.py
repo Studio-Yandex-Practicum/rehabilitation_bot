@@ -1,14 +1,14 @@
 from telegram.ext import (CallbackQueryHandler, CommandHandler,
                           ConversationHandler, MessageHandler, filters)
 
-from src.bot.constants import callback, key, state
-from src.bot.constants.state import MAIN_MENU
-from src.bot.conversations.main_application import main_menu, start, stop
+from bot.constants import callback, key, state
+from bot.constants.state import MAIN_MENU
+from bot.conversations.main_application import main_menu, start, stop
 
-from src.bot.conversations import form_application
-from src.bot.conversations.main_application import greet_new_member
+from bot.conversations import form_application
+from bot.conversations.main_application import greet_new_member
 
-from src.bot.conversations import menu_application
+from bot.conversations import menu_application
 
 form_handler = ConversationHandler(
     entry_points=[
