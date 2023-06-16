@@ -2,7 +2,9 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from smtplib import SMTP_SSL, SMTPException
 
-from src.bot.core.settings import settings
+from telegram import InlineKeyboardMarkup, Update
+
+from bot.core.settings import settings
 
 
 def send_email_message(message: str, subject: str, recipient: str) -> bool:
@@ -30,3 +32,25 @@ def send_email_message(message: str, subject: str, recipient: str) -> bool:
         return True
     except SMTPException:
         return False
+
+
+async def send_message(
+    update: Update,
+    text: str,
+    keyboard: InlineKeyboardMarkup,
+    link_preview: bool = False
+):
+    """Send a message to a user using the inline keyboard"""
+    query = update.callback_query
+    if query:
+        await query.answer()
+        await query.message.edit_text(
+            text=text,
+            reply_markup=keyboard,
+            disable_web_page_preview=not link_preview
+        )
+    await update.message.reply_text(
+        text=text,
+        reply_markup=keyboard,
+        disable_web_page_preview=not link_preview
+    )
