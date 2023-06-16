@@ -1,9 +1,11 @@
+import csv
 import json
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from smtplib import SMTP_SSL, SMTPException
 
 import emoji
+from sqlalchemy.exc import NoResultFound
 from telegram import Message
 from thefuzz import fuzz
 
@@ -14,7 +16,12 @@ from bot.core.db.crud import (
     message_data_crud,
     message_filter_data_crud,
 )
-from bot.core.db.models import MessageData, MessageFilterData, ObsceneWordData
+from bot.core.db.models import (
+    MessageData,
+    MessageFilterData,
+    ObsceneWordData,
+    SpamMLData,
+)
 from bot.core.settings import settings
 
 
@@ -146,7 +153,7 @@ async def get_obscene_words_from_db() -> list[str]:
 async def update_obscene_words_db_table() -> None:
     """Update obscene words database table."""
     async with async_session() as session:
-        with open(settings.obscene_json, "r") as json_file:
+        with open(settings.obscene_file, "r") as json_file:
             obscene_list = json.load(json_file)
             from_db_list = await get_obscene_words_from_db()
             unique_list = [
@@ -155,4 +162,30 @@ async def update_obscene_words_db_table() -> None:
             objects = [ObsceneWordData(word=object) for object in unique_list]
             session.add_all(objects)
             await session.commit()
+            await session.close()
+
+
+async def insert_spam_ml_data_to_db_table():
+    async with async_session() as session:
+        with open(settings.spam_file, "r") as csv_file:
+            spam_data_list = csv.reader(csv_file)
+            next(spam_data_list)
+            objects = [
+                SpamMLData(cls=item[0], text=item[1])
+                for item in spam_data_list
+            ]
+            session.add_all(objects)
+            await session.commit()
+            await session.close()
+
+
+async def get_first_object_from_db(model):
+    """Retrieve first object from the database."""
+    async with async_session() as session:
+        try:
+            obj = await CRUDBase(model).get_first(session)
+            return obj
+        except NoResultFound:
+            return None
+        finally:
             await session.close()

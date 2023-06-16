@@ -10,6 +10,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from bot.constants.info.text import FLOOD_MESSAGE
+from bot.core.settings import settings
 from bot.utils import (
     check_message_limit,
     create_community_member,
@@ -22,10 +23,9 @@ from bot.utils import (
 
 
 # Подготовка данных
-data = pd.read_csv("src/bot/conversations/spam.csv", encoding="utf-8")
+data = pd.read_csv(settings.spam_file, encoding="utf-8")
 data.drop(data.iloc[:, 2:5], inplace=True, axis=1)
 data.rename(columns={"v1": "class", "v2": "text"}, inplace=True)
-
 x = data["text"]
 y = data["class"]
 x_train, x_test, y_train, y_test = train_test_split(x, y, random_state=0)

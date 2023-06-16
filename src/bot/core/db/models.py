@@ -44,3 +44,10 @@ class ObsceneWordData(Base):
 
     def __repr__(self):
         return f"id={self.id} word={self.word}"
+
+
+class SpamMLData(Base):
+    __tablename__ = "spam_ml_data"
+
+    cls: str = Column(String(5))
+    text: str = Column(String(999))

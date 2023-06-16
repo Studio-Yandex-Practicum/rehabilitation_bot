@@ -21,6 +21,10 @@ class CRUDBase:
         db_objs = await session.execute(select(self.model))
         return db_objs.scalars().all()
 
+    async def get_first(self, session: AsyncSession):
+        db_objs = await session.execute(select(self.model))
+        return db_objs.scalars().first()
+
 
 class CRUDMessageData(CRUDBase):
     """CRUD operations for MessageData objects."""

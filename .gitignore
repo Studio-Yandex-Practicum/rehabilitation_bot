@@ -132,5 +132,4 @@ dmypy.json
 .idea/
 
 *sqlite.db
-*.json
 telegram_bot.db

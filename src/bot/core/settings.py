@@ -17,7 +17,9 @@ class Settings(BaseSettings):
     email_curator: str = ""
 
     database_engine: str
-    obscene_json: str
+
+    obscene_file: str
+    spam_file: str
 
     class Config:
         env_file = ".env"
