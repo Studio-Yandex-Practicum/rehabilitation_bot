@@ -1,7 +1,7 @@
 import logging.config
 from pathlib import Path
 
-from src.bot.core.settings import settings
+from bot.core.settings import settings
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
