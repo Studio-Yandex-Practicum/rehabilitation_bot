@@ -80,7 +80,7 @@ def preformatted_text(
 
 
 async def get_community_member_from_db(user_id: int) -> MessageFilterData:
-    """Retrieve community member object from database."""
+    """Retrieves community member object from database."""
     async with async_session() as session:
         community_member = (
             await message_filter_data_crud.get_message_filter_data_by_user_id(
@@ -143,7 +143,7 @@ async def update_community_member_data(
 
 
 async def get_multiple_records_from_db(model):
-    """Retrieve multiple records from the database."""
+    """Retrieves multiple records from the database."""
     async with async_session() as session:
         objects = await CRUDBase(model).get_multi(session)
         await session.close()
@@ -182,7 +182,7 @@ async def insert_spam_ml_data_to_db_table() -> None:
 
 
 async def get_first_object_from_db(model):
-    """Retrieve first object from the database."""
+    """Retrieves first object from the database."""
     async with async_session() as session:
         try:
             obj = await CRUDBase(model).get_first(session)
