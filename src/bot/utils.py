@@ -5,6 +5,7 @@ from email.mime.text import MIMEText
 from smtplib import SMTP_SSL, SMTPException
 
 import emoji
+from async_lru import alru_cache
 from pandas import DataFrame
 from sqlalchemy.exc import NoResultFound
 from telegram import Message
@@ -142,6 +143,7 @@ async def update_community_member_data(
         return sticker_count
 
 
+@alru_cache
 async def get_multiple_records_from_db(model):
     """Retrieves multiple records from the database."""
     async with async_session() as session:
@@ -195,7 +197,9 @@ async def get_first_object_from_db(model):
 
 async def get_dataframe() -> DataFrame:
     """Retrieves data from the database and returns a DataFrame object."""
-    objs = await get_multiple_records_from_db(SpamMLData)
-    attr_list = [[obj.cls, obj.text] for obj in objs]
-    data = DataFrame(attr_list, columns=["class", "text"])
-    return data
+    async with async_session() as session:
+        objs = await CRUDBase(SpamMLData).get_multi(session)
+        attr_list = [[obj.cls, obj.text] for obj in objs]
+        data = DataFrame(attr_list, columns=["class", "text"])
+        await session.close()
+        return data
