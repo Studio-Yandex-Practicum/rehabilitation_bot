@@ -1,4 +1,7 @@
-from telegram import ChatPermissions, Update
+from telegram import ChatPermissions
+from telegram import InlineKeyboardButton as Button
+from telegram import InlineKeyboardMarkup as Keyboard
+from telegram import Update
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
 
@@ -39,10 +42,9 @@ async def greet_new_member(
     """Greeting a new member of the group."""
     user_first_name = update.effective_user.full_name
     welcome_message = WELCOME_MESSAGE.format(user_first_name)
-
     await update.effective_chat.send_message(
         welcome_message,
-        parse_mode=ParseMode.HTML
+        parse_mode=ParseMode.HTML,
     )
     await mute_new_member(update, context)
 
@@ -73,7 +75,11 @@ async def mute_new_member(
     )
     message = ('Для получения возможности отправлять '
                'сообщения пройдите анкетирование.')
-    await update.effective_chat.send_message(message)
+    button = [[Button(text='Заполнить анкету', callback_data='START_FORM')]]
+    await update.effective_chat.send_message(
+        text=message,
+        reply_markup=Keyboard(button),
+    )
 
 
 async def unmute_new_member(
