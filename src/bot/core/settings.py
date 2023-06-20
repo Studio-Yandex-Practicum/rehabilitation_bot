@@ -20,6 +20,7 @@ class Settings(BaseSettings):
 
     obscene_file: str
     spam_file: str
+    chat_id: int
 
     class Config:
         env_file = ".env"

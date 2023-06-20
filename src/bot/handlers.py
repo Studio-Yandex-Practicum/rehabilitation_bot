@@ -16,11 +16,7 @@ from bot.conversations.main_application import (
     stop,
     update_moderation_db,
 )
-from bot.conversations.moderation_application import (
-    chat_moderation,
-    chat_moderation_spam,
-    manage_message_flooding,
-)
+from bot.conversations.moderation_application import moderate_conversation
 
 
 form_handler = ConversationHandler(
@@ -77,15 +73,11 @@ main_handler = ConversationHandler(
 )
 
 
-moderation_handler = MessageHandler(filters.TEXT, chat_moderation)
-
-moderation_spam_handler = MessageHandler(filters.TEXT, chat_moderation_spam)
-
 greet_new_member_handler = MessageHandler(
     filters.StatusUpdate.NEW_CHAT_MEMBERS, greet_new_member
 )
 
-message_filter_handler = MessageHandler(
+moderate_conversation_handler = MessageHandler(
     filters.TEXT | filters.Sticker.ALL & (~filters.StatusUpdate.ALL),
-    manage_message_flooding,
+    moderate_conversation,
 )

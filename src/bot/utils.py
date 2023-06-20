@@ -1,4 +1,3 @@
-import csv
 import json
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -6,24 +5,17 @@ from smtplib import SMTP_SSL, SMTPException
 
 import emoji
 from async_lru import alru_cache
-from pandas import DataFrame
-from sqlalchemy.exc import NoResultFound
 from telegram import Message
 from thefuzz import fuzz
 
-from bot.constants.info.text import MAX_MESSAGES, RATIO_LIMIT
+from bot.constants.filter import MAX_MESSAGES, RATIO_LIMIT
 from bot.core.database import async_session
 from bot.core.db.crud import (
     CRUDBase,
     message_data_crud,
     message_filter_data_crud,
 )
-from bot.core.db.models import (
-    MessageData,
-    MessageFilterData,
-    ObsceneWordData,
-    SpamMLData,
-)
+from bot.core.db.models import MessageData, MessageFilterData, ObsceneWordData
 from bot.core.settings import settings
 
 
@@ -144,7 +136,7 @@ async def update_community_member_data(
 
 
 @alru_cache
-async def get_multiple_records_from_db(model):
+async def get_multiple_records_from_db(model) -> ObsceneWordData:
     """Retrieves multiple records from the database."""
     async with async_session() as session:
         objects = await CRUDBase(model).get_multi(session)
@@ -156,50 +148,17 @@ async def update_obscene_words_db_table() -> None:
     """Update obscene words database table."""
     async with async_session() as session:
         with open(settings.obscene_file, "r") as json_file:
-            obscene_list = json.load(json_file)
-            objects = await get_multiple_records_from_db(ObsceneWordData)
-            wordlist = [obj.word for obj in objects]
-            unique_list = [
-                word for word in obscene_list if word not in wordlist
+            from_file_obscene = json.load(json_file)
+            from_db_obscene = await get_multiple_records_from_db(
+                ObsceneWordData
+            )
+            wordlist = [obj.word for obj in from_db_obscene]
+            unique_wordlist = [
+                word for word in from_file_obscene if word not in wordlist
             ]
-            objects = [ObsceneWordData(word=object) for object in unique_list]
-            session.add_all(objects)
+            to_db_obscene = [
+                ObsceneWordData(word=word) for word in unique_wordlist
+            ]
+            session.add_all(to_db_obscene)
             await session.commit()
             await session.close()
-
-
-async def insert_spam_ml_data_to_db_table() -> None:
-    """Update spam ml data database table."""
-    async with async_session() as session:
-        with open(settings.spam_file, "r") as csv_file:
-            spam_data_list = csv.reader(csv_file)
-            next(spam_data_list)
-            objects = [
-                SpamMLData(cls=item[0], text=item[1])
-                for item in spam_data_list
-            ]
-            session.add_all(objects)
-            await session.commit()
-            await session.close()
-
-
-async def get_first_object_from_db(model):
-    """Retrieves first object from the database."""
-    async with async_session() as session:
-        try:
-            obj = await CRUDBase(model).get_first(session)
-            return obj
-        except NoResultFound:
-            return None
-        finally:
-            await session.close()
-
-
-async def get_dataframe() -> DataFrame:
-    """Retrieves data from the database and returns a DataFrame object."""
-    async with async_session() as session:
-        objs = await CRUDBase(SpamMLData).get_multi(session)
-        attr_list = [[obj.cls, obj.text] for obj in objs]
-        data = DataFrame(attr_list, columns=["class", "text"])
-        await session.close()
-        return data

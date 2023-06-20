@@ -1,79 +1,32 @@
-import asyncio
 import re
 import string
 from datetime import datetime, timedelta
 
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.model_selection import train_test_split
-from sklearn.naive_bayes import MultinomialNB
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from bot.constants.info.text import FLOOD_MESSAGE
+from bot.constants.filter import FLOOD_WARNING_MESSAGE, OBSCENE_WARNING_MESSAGE
 from bot.core.db.models import ObsceneWordData
 from bot.utils import (
     check_message_limit,
     create_community_member,
     fuzzy_string_matching,
     get_community_member_from_db,
-    get_dataframe,
     get_multiple_records_from_db,
     preformatted_text,
     update_community_member_data,
 )
 
 
-loop = asyncio.get_event_loop()
-data = loop.run_until_complete(get_dataframe())
-x = data["text"]
-y = data["class"]
-x_train, x_test, y_train, y_test = train_test_split(x, y, random_state=0)
-
-vectorizer = CountVectorizer()
-X_train_counts = vectorizer.fit_transform(x_train)
-
-nb = MultinomialNB().fit(X_train_counts, y_train)
-
-
-async def chat_moderation(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Function for moderating the conversation"""
-    text = update.message.text
-    text_no_digital = re.sub("[0-9]", "", text)
-    forbidden_objs = await get_multiple_records_from_db(ObsceneWordData)
-    forbidden_words = [obj.word for obj in forbidden_objs]
-    if any(
-        word.lower().translate(str.maketrans("", "", string.punctuation))
-        in forbidden_words
-        for word in text_no_digital.split(" ")
-    ):
-        await update.effective_chat.send_message(
-            text="Нецензурная лексика у нас под запретом!"
-        )
-        await update.message.delete()
-
-
-async def chat_moderation_spam(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-):
-    message = update.message.text.lower()
-    message = re.sub(r"\W", " ", message)
-    message = re.sub(r"\d+", "", message)
-    text_counts = vectorizer.transform([message])
-    if nb.predict(text_counts)[0] == "spam":
-        await update.effective_chat.send_message(
-            text="Спам у нас под запретом!"
-        )
-        await update.message.delete()
-
-
-async def manage_message_flooding(
+async def moderate_conversation(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> None:
     """
-    Monitoring and managing message flooding and sticker usage by comparing
-    text similarity and tracking the number of stickers sent by each user.
+    Moderates a conversation by checking for various conditions
+    such as message frequency, obscene words, and flood.
     """
     current_message = update.message
+    current_message_text = current_message.text
     user_id = current_message.from_user.id
     current_time = datetime.now().replace(microsecond=0)
     user_first_name = current_message.from_user.first_name
@@ -97,18 +50,34 @@ async def manage_message_flooding(
 
         if check_message_limit(message_count):
             await current_message.reply_text(
-                text=FLOOD_MESSAGE.format(user_first_name)
+                text=FLOOD_WARNING_MESSAGE.format(user_first_name)
             )
         return
 
-    if last_message.text and current_message.text:
+    if current_message_text:
+        text_no_digital = re.sub("[0-9]", "", current_message_text)
+        forbidden_objs = await get_multiple_records_from_db(ObsceneWordData)
+        forbidden_words = [obj.word for obj in forbidden_objs]
+
+        if any(
+            word.lower().translate(str.maketrans("", "", string.punctuation))
+            in forbidden_words
+            for word in text_no_digital.split(" ")
+        ):
+            await update.effective_chat.send_message(
+                text=OBSCENE_WARNING_MESSAGE.format(user_first_name)
+            )
+            await current_message.delete()
+            return
+
+    if last_message.text and current_message_text:
         current_text, previous_text = preformatted_text(
-            current_message.text, last_message.text
+            current_message_text, last_message.text
         )
 
         if fuzzy_string_matching(current_text, previous_text):
             await current_message.reply_text(
-                text=FLOOD_MESSAGE.format(user_first_name)
+                text=FLOOD_WARNING_MESSAGE.format(user_first_name)
             )
 
     await update_community_member_data(community_member, current_message)
