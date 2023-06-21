@@ -43,6 +43,7 @@ pycparser==2.21 ; python_full_version == "3.11.1" and sys_platform == "darwin" o
 pydantic==1.10.7 ; python_full_version == "3.11.1"
 pyproject-hooks==1.0.0 ; python_full_version == "3.11.1"
 pyrsistent==0.19.3 ; python_full_version == "3.11.1"
+python-dotenv==0.20.0 ; python_full_version == "3.11.1"
 python-telegram-bot==20.2 ; python_full_version == "3.11.1"
 pywin32-ctypes==0.2.0 ; sys_platform == "win32" and python_full_version == "3.11.1"
 rapidfuzz==2.15.1 ; python_full_version == "3.11.1"

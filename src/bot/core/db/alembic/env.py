@@ -2,15 +2,16 @@ import asyncio
 import os
 from logging.config import fileConfig
 
-from dotenv import load_dotenv
+from alembic import context
+from dotenv import find_dotenv, load_dotenv
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
-from bot.core.db.base import Base  # noqa
 
-from alembic import context
+from bot.core.db.base import Base
 
-load_dotenv(".env")
+
+load_dotenv(find_dotenv())
 
 config = context.config
 

@@ -1,4 +1,3 @@
-version: '3.3'
 services:
   db:
     image: postgres:15.3
@@ -14,6 +13,7 @@ services:
     build:
       context: ../
       dockerfile: infra/Dockerfile
+    command: sh -c "cd bot/core/db/ && alembic upgrade head"
     restart: unless-stopped
     depends_on:
       - db

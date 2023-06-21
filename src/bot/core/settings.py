@@ -1,3 +1,4 @@
+from dotenv import find_dotenv
 from pydantic import BaseSettings
 
 
@@ -23,7 +24,7 @@ class Settings(BaseSettings):
     chat_id: int
 
     class Config:
-        env_file = ".env"
+        env_file = find_dotenv()
         env_file_encoding = "utf-8"
 
 
