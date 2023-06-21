@@ -103,5 +103,4 @@ At this stage the bot is running, and you can simply invite it to the target ser
   </details>
 
 ## Contributors
-For anyone who is interested in contributing to **Rehabilitation Bot
-**, please make sure you fork the project and make a pull request.
+For anyone who is interested in contributing to **Rehabilitation Bot**, please make sure you fork the project and make a pull request.
