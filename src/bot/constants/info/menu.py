@@ -1,29 +1,26 @@
 from bot.constants import key
+from bot.core.db.schemas import FormBase
 
 
 MAIN_MENU = {
     f"{key.MENU}_MAIN": {
-        key.NAME: "Главное меню Кнопка",
-        key.DESCRIPTION: "Временное описание кнопки главного меню",
-        key.MENU: [
-            f"{key.MENU}_SUB",
+        key.NAME: "Главное Меню",
+        key.DESCRIPTION: (
+            "Чтобы принять участие в нашем сообществе и получить "
+            "доступ ко всем возможностям бота, "
+            "пожалуйста, зарегистрируйтесь."
+        ),
+        key.CHILD: [
+            f"{key.FORM}_BASE",
         ],
     }
 }
 
 SUBMENU = {
-    f"{key.MENU}_SUB": {
-        key.NAME: "Кнопка 1",
-        key.DESCRIPTION: "Описание 1",
+    f"{key.FORM}_BASE": {
+        key.NAME: "Регистрация",
+        key.MODEL: FormBase,
         key.PARENT: f"{key.MENU}_MAIN",
-        key.MENU: [
-            f"{key.MENU}_SUB2",
-        ],
-    },
-    f"{key.MENU}_SUB2": {
-        key.NAME: "Кнопка 2",
-        key.DESCRIPTION: "Описание 2",
-        key.PARENT: f"{key.MENU}_SUB",
     },
 }
 

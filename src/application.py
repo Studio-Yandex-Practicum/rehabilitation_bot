@@ -2,7 +2,7 @@ from telegram.ext import Application
 
 from bot.core import logger  # noqa
 from bot.core.settings import settings
-from bot.handlers import main_handler, greet_new_member_handler
+from bot.handlers import greet_new_member_handler, main_handler
 
 
 def main() -> None:

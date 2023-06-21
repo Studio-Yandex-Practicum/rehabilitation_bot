@@ -5,7 +5,6 @@ class Settings(BaseSettings):
     telegram_token: str
     debug: bool = False
 
-
     log_level: str = 'INFO'
     log_filename: str = 'app.log'
     log_format: str = '%(asctime)s, %(levelname)s, %(name)s, %(message)s'
@@ -16,7 +15,6 @@ class Settings(BaseSettings):
     smtp_server_bot_password: str = ''
 
     email_curator: str = ''
-
 
     class Config:
         env_file = '.env'
