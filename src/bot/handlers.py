@@ -14,7 +14,6 @@ from bot.conversations.main_application import (
     main_menu,
     start,
     stop,
-    update_moderation_db,
 )
 from bot.conversations.moderation_application import moderate_conversation
 
@@ -39,35 +38,34 @@ form_handler = ConversationHandler(
                 form_application.show_data, pattern=callback.SHOW_DATA
             ),
             CallbackQueryHandler(
-                form_application.edit_data, pattern=rf"^{key.ASK}_\S*$"
+                form_application.edit_data, pattern=fr"^{key.ASK}_\S*$"
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND, form_application.save_data
             ),
         ],
     },
-    fallbacks=[CommandHandler("menu", main_menu)],
+    fallbacks=[CommandHandler('menu', main_menu)],
     allow_reentry=True,
 )
 
 
 main_handler = ConversationHandler(
     entry_points=[
-        CommandHandler("start", start),
-        CommandHandler("upd_mod_db", update_moderation_db),
+        CommandHandler('start', start),
     ],
     states={
         MAIN_MENU: [
             form_handler,
             # CallbackQueryHandler(
-            # menu_application.menu, pattern=fr"^{key.MENU}_\S*$"
+            # menu_application.menu, pattern=fr'^{key.MENU}_\S*$'
             # ),
             # uncomment after adding the menu manager
         ],
     },
     fallbacks=[
-        CommandHandler("menu", main_menu),
-        CommandHandler("stop", stop),
+        CommandHandler('menu', main_menu),
+        CommandHandler('stop', stop),
     ],
     allow_reentry=True,
 )

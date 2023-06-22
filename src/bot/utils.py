@@ -2,12 +2,11 @@ import json
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from smtplib import SMTP_SSL, SMTPException
-
+from sqlalchemy.exc import NoResultFound
 import emoji
-from async_lru import alru_cache
 from telegram import Message
 from thefuzz import fuzz
-
+from async_lru import alru_cache
 from bot.constants.filter import MAX_MESSAGES, RATIO_LIMIT
 from bot.core.database import async_session
 from bot.core.db.crud import (
@@ -17,15 +16,16 @@ from bot.core.db.crud import (
 )
 from bot.core.db.models import MessageData, MessageFilterData, ObsceneWordData
 from bot.core.settings import settings
+from bot.core.logger import logger
 
 
 def send_email_message(message: str, subject: str, recipient: str) -> bool:
     """Send email message to the specified curator email-address."""
     msg = MIMEMultipart()
-    msg["From"] = settings.smtp_server_bot_email
-    msg["To"] = recipient
-    msg["Subject"] = subject
-    msg.attach(MIMEText(message, "html"))
+    msg['From'] = settings.smtp_server_bot_email
+    msg['To'] = recipient
+    msg['Subject'] = subject
+    msg.attach(MIMEText(message, 'html'))
     try:
         with SMTP_SSL(
             settings.smtp_server_address,
@@ -135,13 +135,17 @@ async def update_community_member_data(
         return sticker_count
 
 
-@alru_cache
+@alru_cache(maxsize=16)
 async def get_multiple_records_from_db(model) -> ObsceneWordData:
     """Retrieves multiple records from the database."""
     async with async_session() as session:
-        objects = await CRUDBase(model).get_multi(session)
-        await session.close()
-        return objects
+        try:
+            objects = await CRUDBase(model).get_multi(session)
+            return objects
+        except NoResultFound:
+            logger.error("Obscene results not found.")
+        finally:
+            await session.close()
 
 
 async def update_obscene_words_db_table() -> None:
@@ -159,6 +163,7 @@ async def update_obscene_words_db_table() -> None:
             to_db_obscene = [
                 ObsceneWordData(word=word) for word in unique_wordlist
             ]
+            get_multiple_records_from_db.cache_clear()
             session.add_all(to_db_obscene)
             await session.commit()
             await session.close()
