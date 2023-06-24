@@ -41,9 +41,14 @@ form_handler = ConversationHandler(
         ],
     },
     fallbacks=[
-        CallbackQueryHandler(start, callback.START),
+        CallbackQueryHandler(start, callback.BACK),
     ],
     allow_reentry=True,
+)
+
+greet_new_member_handler = MessageHandler(
+    filters.StatusUpdate.NEW_CHAT_MEMBERS,
+    greet_new_member
 )
 
 
@@ -63,9 +68,4 @@ main_handler = ConversationHandler(
         CommandHandler('stop', stop)
     ],
     allow_reentry=True,
-)
-
-greet_new_member_handler = MessageHandler(
-    filters.StatusUpdate.NEW_CHAT_MEMBERS,
-    greet_new_member
 )

@@ -162,7 +162,7 @@ async def send_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await send_message(
         update,
         response_message,
-        keyboard=Keyboard([[button.START_BACK]]),
+        keyboard=Keyboard([[button.BACK]]),
     )
 
     return state.MAIN_MENU
