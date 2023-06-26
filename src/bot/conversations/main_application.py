@@ -2,55 +2,75 @@ from telegram import ChatPermissions, Update
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
 
-from bot.constants import state
-# from bot.constants.info.menu import ALL_MENU
-# uncomment after adding the menu manager
+from bot.constants import key, state
+from bot.constants.info.menu import ALL_MENU
 from bot.constants.info.text import (
+    COMPLETE_MESSAGE,
     START_MESSAGE,
     STOP_MESSAGE,
     WELCOME_MESSAGE,
 )
 from bot.conversations.menu_application import menu
+from bot.utils import send_message
 
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def start(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+):
     """Send a welcome message to the user."""
-    await update.message.reply_text(START_MESSAGE)
+    user = update.effective_user
+    message = START_MESSAGE.format(name=user.full_name)
+
+    if context.user_data.get(key.FORM, {}).get(key.COMPLETE):
+        return await send_message(update, message + COMPLETE_MESSAGE)
+
+    await send_message(update, message)
+
     return await main_menu(update, context)
 
 
-async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # context.user_data[key.MENU] = ALL_MENU[f"{key.MENU}_MAIN"]
-    # uncomment after adding the menu manager
-    await menu(update, context)
-    return state.MAIN_MENU
-
-
-async def greet_new_member(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> None:
-    """Greeting a new member of the group."""
-    user_first_name = update.effective_user.full_name
-    welcome_message = WELCOME_MESSAGE.format(user_first_name)
-
-    await update.effective_chat.send_message(
-        welcome_message, parse_mode=ParseMode.HTML
-    )
-    await mute_new_member(update, context)
-
-
-async def stop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def stop(update: Update, _) -> int:
     """Stops the conversation and replies with the given message."""
     await update.message.reply_text(STOP_MESSAGE)
     return ConversationHandler.END
 
 
-async def mute_new_member(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> None:
+async def main_menu(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+):
+
+    context.user_data[key.MENU] = ALL_MENU[f"{key.MENU}_MAIN"]
+    await menu(update, context)
+    return state.MAIN_MENU
+
+
+async def greet_new_member(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+):
+    """Greeting a new member of the group."""
+    new_members = update.message.new_chat_members
+
+    for member in new_members:
+        welcome_message = WELCOME_MESSAGE.format(
+            nickname=member.name,
+            full_name=member.full_name,
+            bot_link=context.bot.link
+        )
+        await update.effective_chat.send_message(
+            welcome_message,
+            parse_mode=ParseMode.HTML
+        )
+        await mute_member(context, member.id, update.effective_chat.id)
+
+
+async def mute_member(
+    context: ContextTypes.DEFAULT_TYPE,
+    user_id: int, chat_id: int
+):
     """Mute a new member of the chat."""
-    chat_id = update.effective_chat.id
-    user_id = update.effective_user.id
     await context.bot.restrict_chat_member(
         chat_id=chat_id,
         user_id=user_id,
@@ -59,19 +79,13 @@ async def mute_new_member(
             can_send_media_messages=False,
         ),
     )
-    message = (
-        "Для получения возможности отправлять "
-        "сообщения пройдите анкетирование."
-    )
-    await update.effective_chat.send_message(message)
 
 
-async def unmute_new_member(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> None:
+async def unmute_member(
+    context: ContextTypes.DEFAULT_TYPE,
+    user_id: int, chat_id: int
+):
     """Unmute a new member of the chat."""
-    chat_id = update.effective_chat.id
-    user_id = update.effective_user.id
     await context.bot.restrict_chat_member(
         chat_id=chat_id,
         user_id=user_id,
@@ -80,8 +94,3 @@ async def unmute_new_member(
             can_send_media_messages=True,
         ),
     )
-    message = (
-        f"Уважаемый {update.effective_user.full_name}, "
-        "права доступа обновлены."
-    )
-    await update.effective_chat.send_message(message)

@@ -18,10 +18,10 @@
 ---
 
 ## What is Rehabilitation Bot?
-
+Rehabilitation Bot is a Telegram bot that helps users create a healthy community between rehabilitation professionals, as well as between those who would like to be aware of rehabilitation techniques.
 
 ## How does it work?
-
+To use Rehabilitation Bot, simply add it to your Telegram contacts and start chatting with it. When you can add the bot to the selected channel as an administrator, the bot will be able to moderate chat and filter chat participants.
 
 ## How to Setup?
 
@@ -82,9 +82,25 @@ UNIX:
  source .venv/bin/activate
 ```
 </details>
-</details>
 
+</details>
+<details>
+  <summary> .env file </summary>
+
+  After installing Poetry, you need to create a .env file with the telegram bot token:
+```
+  telegram_token=put_telegram_bot_token_here
+```
+  </details>
+<details>
+  <summary> Last steps </summary>
+  
+Now you can run the bot with the following command while in the bot directory:
+```
+  python application.py
+```
+At this stage the bot is running, and you can simply invite it to the target server and give it administrator rights.
+  </details>
 
 ## Contributors
-For anyone who is interested in contributing to **Rehabilitation Bot
-**, please make sure you fork the project and make a pull request.
+For anyone who is interested in contributing to **Rehabilitation Bot**, please make sure you fork the project and make a pull request.

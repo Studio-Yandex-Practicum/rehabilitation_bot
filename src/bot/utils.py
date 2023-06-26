@@ -15,8 +15,34 @@ from bot.core.db.crud import (
     message_filter_data_crud,
 )
 from bot.core.db.models import MessageData, MessageFilterData, ObsceneWordData
+from typing import Optional
+
+from telegram import InlineKeyboardMarkup, Update
+
+from bot.constants.info.text import MESSAGE_MARKDOWN
 from bot.core.settings import settings
 from bot.core.logger import logger
+
+
+async def send_message(
+    update: Update,
+    text: str,
+    keyboard: Optional[InlineKeyboardMarkup] = None,
+    link_preview: bool = False
+):
+    """Send a message with optional inline keyboard and link preview."""
+    message_args = {
+        'text': text,
+        'reply_markup': keyboard,
+        'parse_mode': MESSAGE_MARKDOWN,
+        'disable_web_page_preview': not link_preview,
+    }
+    query = update.callback_query
+    if query:
+        await query.answer()
+        await query.message.edit_text(**message_args)
+    else:
+        await update.message.reply_text(**message_args)
 
 
 def send_email_message(message: str, subject: str, recipient: str) -> bool:

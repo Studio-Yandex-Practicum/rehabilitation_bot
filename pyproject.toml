@@ -11,7 +11,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "3.11.1"
 poetry = "^1.4.2"
-pydantic = "^1.10.7"
+pydantic = {extras = ["email"], version = "^1.10.9"}
 python-telegram-bot = "^20.2"
 emoji = "^2.4.0"
 thefuzz = {extras = ["speedup"], version = "^0.19.0"}
@@ -19,6 +19,7 @@ sqlalchemy = "^2.0.15"
 alembic = "^1.11.1"
 asyncpg = "^0.27.0"
 async-lru = "^2.0.2"
+email-validate = "^1.1.2"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^6.0.0"
