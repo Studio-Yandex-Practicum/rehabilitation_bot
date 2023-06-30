@@ -19,7 +19,6 @@ class Settings(BaseSettings):
 
     database_engine: str
     obscene_file: str
-    chat_id: int
 
     class Config:
         env_file = find_dotenv()
