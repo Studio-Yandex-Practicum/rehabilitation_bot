@@ -21,7 +21,7 @@ def upgrade() -> None:
     op.create_table('message_data',
     sa.Column('text', sa.String(), nullable=True),
     sa.Column('sticker', sa.String(), nullable=True),
-    sa.Column('timestamp', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('timestamp', sa.DateTime(), nullable=True),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
