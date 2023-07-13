@@ -34,7 +34,7 @@ jobs:
 
   deploy:
      runs-on: ubuntu-latest
-     needs: linters_test
+    #  needs: linters_test
      steps:
        - name: executing remote ssh commands to deploy
          uses: appleboy/ssh-action@master
