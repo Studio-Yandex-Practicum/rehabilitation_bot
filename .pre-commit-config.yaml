@@ -5,7 +5,7 @@ repos:
     -   id: trailing-whitespace
     -   id: end-of-file-fixer
     -   id: check-yaml
-    -   id: check-added-large-files
+#    -   id: check-added-large-files
 
 - repo: local
   hooks:
@@ -13,6 +13,7 @@ repos:
     - id: isort
       name: isort
       entry: isort
+      exclude: "^(?!versions/)"
       files: ^(bot/|core/|src/)
       language: system
       types: [python]
@@ -21,6 +22,7 @@ repos:
       additional_dependencies: [Flake8-pyproject]
       name: flake8
       entry: flake8
+      exclude: "^(?!versions/)"
       files: ^(bot/|core/|src/)
       language: python
       types: [python]

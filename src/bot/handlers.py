@@ -10,6 +10,7 @@ from bot.constants import callback, key, state
 from bot.constants.state import MAIN_MENU
 from bot.conversations import form_application, menu_application
 from bot.conversations.main_application import greet_new_member, start, stop
+from bot.conversations.moderation_application import moderate_conversation
 
 
 form_handler = ConversationHandler(
@@ -68,4 +69,10 @@ main_handler = ConversationHandler(
         CommandHandler('stop', stop)
     ],
     allow_reentry=True,
+)
+
+
+moderate_conversation_handler = MessageHandler(
+    filters.TEXT | filters.Sticker.ALL & (~filters.StatusUpdate.ALL),
+    moderate_conversation,
 )

@@ -130,3 +130,7 @@ dmypy.json
 
 .vscode/
 .idea/
+
+*sqlite.db
+telegram_bot.db
+src/bot/logs/*
