@@ -143,25 +143,26 @@ async def show_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def send_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Send form data to the specified curator email-address."""
-    user_data = context.user_data
-    form = user_data[key.FORM]
-    data = form[key.DATA]
-    message = form[key.SHOW_DATA].replace("\n", "<br>")
+    # TODO uncomment
+    # user_data = context.user_data
+    # form = user_data[key.FORM]
+    # data = form[key.DATA]
+    # message = form[key.SHOW_DATA].replace("\n", "<br>")
 
-    subject = f"{text.FORM} {data.full_name}"
+    # subject = f"{text.FORM} {data.full_name}"
 
-    curators = settings.email_curator.split(',')
-    if all(
-        send_email_message(message, subject, curator) for curator in curators
-    ):
-        response_message = text.MAIL_SEND_OK_MESSAGE
-        user_data[key.FORM][key.COMPLETE] = True
-    else:
-        response_message = text.MAIL_SEND_ERROR_MESSAGE
+    # curators = settings.email_curator.split(',')
+    # if all(
+    #     send_email_message(message, subject, curator) for curator in curators
+    # ):
+    #     response_message = text.MAIL_SEND_OK_MESSAGE
+    #     user_data[key.FORM][key.COMPLETE] = True
+    # else:
+    #     response_message = text.MAIL_SEND_ERROR_MESSAGE
 
     await send_message(
         update,
-        response_message,
+        "Здесь будет сообщение об статусе отправки на email",
         keyboard=Keyboard([[button.BACK]]),
     )
 
