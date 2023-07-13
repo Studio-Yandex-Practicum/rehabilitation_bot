@@ -44,6 +44,7 @@ jobs:
            host: ${{ secrets.HOST }}
            username: ${{ secrets.USER }}
            key: ${{ secrets.SSH }}
+           port: ${{ secrets.PORT }}
            stack_file_name: docker-compose.yaml
            script: |
              sudo docker stop $(sudo docker ps -a -q --filter="expose=5432")
